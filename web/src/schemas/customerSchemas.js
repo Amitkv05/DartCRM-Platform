@@ -1,0 +1,46 @@
+import { z } from "zod";
+
+export const customerSchema = z.object({
+  customerType: z.enum(["SCHOOL", "INSTITUTE", "TRADE", "LIBRARY"]),
+  customerName: z.string().min(2, "Customer name is required"),
+  address: z.string().min(3, "Address is required"),
+  cityId: z.coerce.number().positive("City is required"),
+  pincode: z.string().min(4, "Pincode is required"),
+  customerStatus: z.enum(["ACTIVE", "INACTIVE"]),
+  refCode: z.string().optional(),
+  email: z.union([z.string().email(), z.literal("")]).optional(),
+  mobile: z.string().optional(),
+  keyCustomer: z.boolean().optional(),
+  latitude: z.union([z.coerce.number(), z.literal("")]).optional(),
+  longitude: z.union([z.coerce.number(), z.literal("")]).optional(),
+  gstNumber: z.string().optional(),
+  panNumber: z.string().optional(),
+  school: z.object({
+    boardId: z.union([z.coerce.number(), z.literal("")]).optional(),
+    chainSchoolId: z.union([z.coerce.number(), z.literal("")]).optional(),
+    startClassId: z.union([z.coerce.number(), z.literal("")]).optional(),
+    endClassId: z.union([z.coerce.number(), z.literal("")]).optional(),
+    mediumInstruction: z.string().optional(),
+    ranking: z.string().optional(),
+    samplingMonth: z.union([z.coerce.number(), z.literal("")]).optional(),
+    decisionMonth: z.union([z.coerce.number(), z.literal("")]).optional(),
+    purchaseModeId: z.union([z.coerce.number(), z.literal("")]).optional(),
+  }).optional(),
+});
+
+export const contactSchema = z.object({
+  firstName: z.string().min(1, "First name is required"),
+  lastName: z.string().optional(),
+  designationId: z.coerce.number().positive("Designation is required"),
+  salutationId: z.union([z.coerce.number(), z.literal("")]).optional(),
+  email: z.union([z.string().email(), z.literal("")]).optional(),
+  mobile: z.string().optional(),
+  contactStatus: z.enum(["ACTIVE", "INACTIVE"]),
+  primaryContact: z.boolean().optional(),
+  residentialAddress: z.string().optional(),
+  residentialCityId: z.union([z.coerce.number(), z.literal("")]).optional(),
+  residentialPincode: z.string().optional(),
+  birthday: z.string().optional(),
+  anniversary: z.string().optional(),
+  dataSourceId: z.union([z.coerce.number(), z.literal("")]).optional(),
+});

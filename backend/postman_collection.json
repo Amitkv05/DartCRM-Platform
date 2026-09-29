@@ -1,0 +1,2011 @@
+{
+  "info": {
+    "name": "CRM backend - Admin & Audit",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "CRM backend collection. Includes configurable manager approvals, Admin approval-role management, final-vs-next-level approval, Customer Update staging, Sampling/Self-Stock quantity approval and Visit Backdate approvals."
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:5000"
+    },
+    {
+      "key": "apiToken",
+      "value": ""
+    },
+    {
+      "key": "accessToken",
+      "value": ""
+    },
+    {
+      "key": "refreshToken",
+      "value": ""
+    },
+    {
+      "key": "approvalId",
+      "value": "1"
+    },
+    {
+      "key": "samplingRequestId",
+      "value": "1"
+    },
+    {
+      "key": "selfStockRequestId",
+      "value": "1"
+    },
+    {
+      "key": "brandId",
+      "value": "4"
+    },
+    {
+      "key": "eProductId",
+      "value": "2"
+    },
+    {
+      "key": "customerId",
+      "value": "1"
+    },
+    {
+      "key": "academicSessionId",
+      "value": "2"
+    },
+    {
+      "key": "today",
+      "value": ""
+    },
+    {
+      "key": "targetExecutiveId",
+      "value": "1002"
+    },
+    {
+      "key": "approvalModule",
+      "value": "CUSTOMER_CREATE"
+    }
+  ],
+  "item": [
+    {
+      "name": "01 - Authentication",
+      "item": [
+        {
+          "name": "Generate API Token",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/token",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "token"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"crm-service@example.com\",\n  \"secret\": \"crm-service-secret\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const j = pm.response.json();",
+                  "if (j.apiToken) pm.collectionVariables.set('apiToken', String(j.apiToken).trim());"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Login Field Executive",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "x-api-token",
+                "value": "{{apiToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "login"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"field@crm.local\",\n  \"password\": \"Password@123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const j = pm.response.json();",
+                  "if (j.accessToken) pm.collectionVariables.set('accessToken', String(j.accessToken).trim());",
+                  "if (j.refreshToken) pm.collectionVariables.set('refreshToken', String(j.refreshToken).trim());"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "My Hierarchy",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-api-token",
+                "value": "{{apiToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/executives/me/hierarchy",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "executives", "me", "hierarchy"]
+            }
+          }
+        },
+        {
+          "name": "Setup Values",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-api-token",
+                "value": "{{apiToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/setup",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "setup"]
+            }
+          }
+        },
+        {
+          "name": "Menus",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-api-token",
+                "value": "{{apiToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/menus",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "menus"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "02 - Attendance",
+      "item": [
+        {
+          "name": "Check In",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "x-api-token",
+                "value": "{{apiToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/attendance/check-in",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "attendance", "check-in"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"latitude\": 28.63,\n  \"longitude\": 77.28,\n  \"address\": \"Delhi\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Today Status",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-api-token",
+                "value": "{{apiToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/attendance/today",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "attendance", "today"]
+            }
+          }
+        },
+        {
+          "name": "Submit Location",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "x-api-token",
+                "value": "{{apiToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/attendance/locations",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "attendance", "locations"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"locations\": [\n    {\n      \"latitude\": 28.631,\n      \"longitude\": 77.281,\n      \"address\": \"Field location\"\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Check Out",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "x-api-token",
+                "value": "{{apiToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/attendance/check-out",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "attendance", "check-out"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"latitude\": 28.64,\n  \"longitude\": 77.29,\n  \"address\": \"Delhi\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "03 - Customers",
+      "item": [
+        {
+          "name": "Customer Master Data",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-api-token",
+                "value": "{{apiToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/customers/master-data",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "customers", "master-data"]
+            }
+          }
+        },
+        {
+          "name": "List Customers",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-api-token",
+                "value": "{{apiToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/customers",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "customers"]
+            }
+          }
+        },
+        {
+          "name": "Customer Details",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-api-token",
+                "value": "{{apiToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/customers/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "customers", "1"]
+            }
+          }
+        },
+        {
+          "name": "Contacts",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-api-token",
+                "value": "{{apiToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/contacts/customer/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "contacts", "customer", "1"]
+            }
+          }
+        },
+        {
+          "name": "Search Cities",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-api-token",
+                "value": "{{apiToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/customers/search-cities",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "customers", "search-cities"]
+            }
+          }
+        },
+        {
+          "name": "Book Sellers",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-api-token",
+                "value": "{{apiToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/customers/book-sellers",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "customers", "book-sellers"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "04 - Visit / DSR",
+      "item": [
+        {
+          "name": "Plan List",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-api-token",
+                "value": "{{apiToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/plans",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "plans"]
+            }
+          }
+        },
+        {
+          "name": "DSR Entry Data",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-api-token",
+                "value": "{{apiToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/visits/dsr-entry?customerId={{customerId}}&executiveId=1001",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "visits", "dsr-entry"]
+            },
+            "description": "Returns visit preparation data including Sales Stage, Brand, Prospect, Academic Sessions, ApplicationSetupKeyValue and one or more allowed date ranges."
+          }
+        },
+        {
+          "name": "Upload Visit Document",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "x-api-token",
+                "value": "{{apiToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fileName\": \"demo.png\",\n  \"fileExtension\": \"png\",\n  \"module\": \"visit\",\n  \"base64String\": \"PASTE_BASE64_HERE\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/files/upload",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "files", "upload"]
+            }
+          }
+        },
+        {
+          "name": "Follow-up Executives",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-api-token",
+                "value": "{{apiToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/visits/follow-up-executives?departmentId=1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "visits", "follow-up-executives?departmentId=1"]
+            }
+          }
+        },
+        {
+          "name": "Create Visit",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "x-api-token",
+                "value": "{{apiToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/visits",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "visits"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"customerId\": 1,\n  \"customerType\": \"SCHOOL\",\n  \"customerContactId\": 1,\n  \"academicSessionId\": 2,\n  \"visitPurposeId\": 1,\n  \"visitFeedback\": \"Detailed demo visit feedback with an E-Product promotion.\",\n  \"visitDate\": \"{{today}}\",\n  \"address\": \"Demo Public School, Delhi\",\n  \"latitude\": 28.63,\n  \"longitude\": 77.28,\n  \"jointExecutiveIds\": [\n    1002\n  ],\n  \"followUps\": [\n    {\n      \"departmentId\": 1,\n      \"followUpExecutiveId\": 1002,\n      \"action\": \"Discuss adoption decision\",\n      \"followUpDate\": \"{{today}}\"\n    }\n  ],\n  \"eProductPromotions\": [\n    {\n      \"brandId\": 4,\n      \"eProductId\": 2,\n      \"salesStageId\": 3,\n      \"prospectId\": 5,\n      \"classIds\": [\n        1\n      ],\n      \"remarks\": \"Product demonstrated\"\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "One Visit transaction. E-Product promotion data is stored with the same Visit; do not create a second Visit."
+          }
+        },
+        {
+          "name": "My Backdate Requests",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-api-token",
+                "value": "{{apiToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/visits/backdate-requests",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "visits", "backdate-requests"]
+            }
+          }
+        },
+        {
+          "name": "Request Visit Backdate",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "x-api-token",
+                "value": "{{apiToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/visits/backdate-requests",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "visits", "backdate-requests"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"visitDate\": \"2026-09-01\",\n  \"reason\": \"Missed visit entry due to network issue\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "05 - E-Products",
+      "item": [
+        {
+          "name": "Products by Brand (V2)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-api-token",
+                "value": "{{apiToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/e-products/brands/{{brandId}}/products",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "e-products", "brands", "{{brandId}}", "products"]
+            }
+          }
+        },
+        {
+          "name": "Product Details (V2)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-api-token",
+                "value": "{{apiToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/e-products/{{eProductId}}/details?academicSessionId={{academicSessionId}}&customerId={{customerId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "e-products", "{{eProductId}}", "details"]
+            }
+          }
+        },
+        {
+          "name": "ProductListbyBrandId (compatibility)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "x-api-token",
+                "value": "{{apiToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/ProductListbyBrandId",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "ProductListbyBrandId"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"BrandId\": \"2\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "ProductDetailsbyEProductId (compatibility)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "x-api-token",
+                "value": "{{apiToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/ProductDetailsbyEProductId",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "ProductDetailsbyEProductId"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"eProductId\": \"2\",\n  \"AcademicSessionId\": \"2\",\n  \"Customerid\": \"1\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "06 - Customer Sampling",
+      "item": [
+        {
+          "name": "Sampling Details",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-api-token",
+                "value": "{{apiToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/sampling/details?customerId=1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "sampling", "details?customerId=1"]
+            }
+          }
+        },
+        {
+          "name": "Ship To",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-api-token",
+                "value": "{{apiToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/sampling/ship-to?customerId=1&customerContactId=1&sampleGiven=TO_BE_DISPATCHED",
+              "host": ["{{baseUrl}}"],
+              "path": [
+                "api",
+                "sampling",
+                "ship-to?customerId=1&customerContactId=1&sampleGiven=TO_BE_DISPATCHED"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Shipment Modes",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-api-token",
+                "value": "{{apiToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/catalog/shipment-modes",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "catalog", "shipment-modes"]
+            }
+          }
+        },
+        {
+          "name": "Create Customer Sampling",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "x-api-token",
+                "value": "{{apiToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/sampling/customer",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "sampling", "customer"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"customerId\": 1,\n  \"customerType\": \"SCHOOL\",\n  \"executiveId\": 1001,\n  \"shipmentModeId\": 1,\n  \"requestRemarks\": \"Teacher review copies\",\n  \"items\": [\n    {\n      \"seriesId\": 1,\n      \"bookId\": 1,\n      \"requestedQty\": 5,\n      \"samplingTypeId\": 3,\n      \"sampleToContactId\": 1,\n      \"sampleGiven\": \"TO_BE_DISPATCHED\",\n      \"shipTo\": \"OFFICE_ADDRESS\",\n      \"shippingAddress\": \"Demo Public School, Delhi\"\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "My Sampling Requests",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-api-token",
+                "value": "{{apiToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/sampling/requests",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "sampling", "requests"]
+            }
+          }
+        },
+        {
+          "name": "Sampling Approval Inbox",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-api-token",
+                "value": "{{apiToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/sampling/approvals",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "sampling", "approvals"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "07 - Self Stock",
+      "item": [
+        {
+          "name": "Self Stock Master",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-api-token",
+                "value": "{{apiToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/self-stock/master-data",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "self-stock", "master-data"]
+            }
+          }
+        },
+        {
+          "name": "Trade Addresses",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-api-token",
+                "value": "{{apiToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/self-stock/trade-addresses",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "self-stock", "trade-addresses"]
+            }
+          }
+        },
+        {
+          "name": "Create Self Stock",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "x-api-token",
+                "value": "{{apiToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/self-stock/requests",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "self-stock", "requests"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"executiveId\": 1001,\n  \"shipTo\": \"RESIDENCE_ADDRESS\",\n  \"shippingAddress\": \"Demo residence\",\n  \"shipmentModeId\": 2,\n  \"remarks\": \"Demo stock\",\n  \"items\": [\n    {\n      \"subjectId\": 1,\n      \"seriesId\": 1,\n      \"bookId\": 1,\n      \"requestedQty\": 4\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "My Self Stock Requests",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-api-token",
+                "value": "{{apiToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/self-stock/requests",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "self-stock", "requests"]
+            }
+          }
+        },
+        {
+          "name": "Self Stock Approval Inbox",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-api-token",
+                "value": "{{apiToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/self-stock/approvals",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "self-stock", "approvals"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "08 - Approvals",
+      "item": [
+        {
+          "name": "My Approval Inbox",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-api-token",
+                "value": "{{apiToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/approvals",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "approvals"]
+            }
+          }
+        },
+        {
+          "name": "Approval Details",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-api-token",
+                "value": "{{apiToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/approvals/{{approvalId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "approvals", "{{approvalId}}"]
+            }
+          }
+        },
+        {
+          "name": "Approve with Quantity",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "x-api-token",
+                "value": "{{apiToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/approvals/{{approvalId}}/action",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "approvals", "{{approvalId}}", "action"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"action\": \"APPROVE\",\n  \"remarks\": \"Approved\",\n  \"items\": [\n    {\n      \"itemId\": 1,\n      \"approvedQty\": 4\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Reject",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "x-api-token",
+                "value": "{{apiToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/approvals/{{approvalId}}/action",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "approvals", "{{approvalId}}", "action"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"action\": \"REJECT\",\n  \"remarks\": \"Not approved\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Bulk Approve",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "x-api-token",
+                "value": "{{apiToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/approvals/bulk-action",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "approvals", "bulk-action"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"action\": \"APPROVE\",\n  \"approvalIds\": [\n    1,\n    2\n  ],\n  \"remarks\": \"Bulk approval\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "09 - Notifications",
+      "item": [
+        {
+          "name": "Notifications",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-api-token",
+                "value": "{{apiToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/notifications",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "notifications"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "10 - Approval Workflow V3",
+      "item": [
+        {
+          "name": "Login L2 Manager (stores JWT)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "x-api-token",
+                "value": "{{apiToken}}",
+                "type": "text"
+              },
+              {
+                "key": "x-api-token",
+                "value": "{{apiToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "login"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"manager@crm.local\",\n  \"password\": \"Password@123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const j = pm.response.json();",
+                  "if (j.accessToken) pm.collectionVariables.set('accessToken', String(j.accessToken).trim());",
+                  "if (j.refreshToken) pm.collectionVariables.set('refreshToken', String(j.refreshToken).trim());"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "My Approvals - Selected Module",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-api-token",
+                "value": "{{apiToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/approvals?module={{approvalModule}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "approvals"],
+              "query": [
+                {
+                  "key": "module",
+                  "value": "{{approvalModule}}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Approval Details",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-api-token",
+                "value": "{{apiToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/approvals/{{approvalId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "approvals", "{{approvalId}}"]
+            }
+          }
+        },
+        {
+          "name": "Approve + Send to Next Level",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "x-api-token",
+                "value": "{{apiToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/approvals/{{approvalId}}/action",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "approvals", "{{approvalId}}", "action"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"action\": \"APPROVE\",\n  \"remarks\": \"Approved and forwarded\",\n  \"sendToNextLevel\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Final Approve at Current Level",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "x-api-token",
+                "value": "{{apiToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/approvals/{{approvalId}}/action",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "approvals", "{{approvalId}}", "action"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"action\": \"APPROVE\",\n  \"remarks\": \"Final approval at this level\",\n  \"sendToNextLevel\": false\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Approve Sampling/Self-Stock Quantity + Forward",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "x-api-token",
+                "value": "{{apiToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/approvals/{{approvalId}}/action",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "approvals", "{{approvalId}}", "action"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"action\": \"APPROVE\",\n  \"remarks\": \"Quantity reviewed\",\n  \"sendToNextLevel\": true,\n  \"items\": [\n    {\n      \"itemId\": 1,\n      \"approvedQty\": 5\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Reject Request",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "x-api-token",
+                "value": "{{apiToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/approvals/{{approvalId}}/action",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "approvals", "{{approvalId}}", "action"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"action\": \"REJECT\",\n  \"remarks\": \"Rejected after review\",\n  \"sendToNextLevel\": false\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "11 - Admin Approval Roles",
+      "item": [
+        {
+          "name": "Login Admin (stores JWT)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "x-api-token",
+                "value": "{{apiToken}}",
+                "type": "text"
+              },
+              {
+                "key": "x-api-token",
+                "value": "{{apiToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "login"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@crm.local\",\n  \"password\": \"Password@123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const j = pm.response.json();",
+                  "if (j.accessToken) pm.collectionVariables.set('accessToken', String(j.accessToken).trim());",
+                  "if (j.refreshToken) pm.collectionVariables.set('refreshToken', String(j.refreshToken).trim());"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "List Executive Approval Roles",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-api-token",
+                "value": "{{apiToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/executives/approval-roles",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "executives", "approval-roles"]
+            }
+          }
+        },
+        {
+          "name": "Enable Approval Role",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "x-api-token",
+                "value": "{{apiToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/executives/{{targetExecutiveId}}/approval-role",
+              "host": ["{{baseUrl}}"],
+              "path": [
+                "api",
+                "admin",
+                "executives",
+                "{{targetExecutiveId}}",
+                "approval-role"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"approvalEnabled\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Disable Approval Role",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "x-api-token",
+                "value": "{{apiToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/executives/{{targetExecutiveId}}/approval-role",
+              "host": ["{{baseUrl}}"],
+              "path": [
+                "api",
+                "admin",
+                "executives",
+                "{{targetExecutiveId}}",
+                "approval-role"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"approvalEnabled\": false\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "12 - Admin & Audit V4",
+      "item": [
+        {
+          "name": "Role Management Metadata",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-api-token",
+                "value": "{{apiToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/role-management/meta",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "role-management", "meta"]
+            }
+          }
+        },
+        {
+          "name": "List Users / Executives",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-api-token",
+                "value": "{{apiToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/users",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "users"]
+            }
+          }
+        },
+        {
+          "name": "Create User / Executive",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "x-api-token",
+                "value": "{{apiToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/users",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "users"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"loginEmail\": \"new.l1@crm.local\",\n  \"password\": \"Password@123\",\n  \"executiveCode\": \"EXE-L1-NEW\",\n  \"executiveName\": \"New Field Executive\",\n  \"profileId\": 1,\n  \"managerExecutiveId\": 1002,\n  \"approvalEnabled\": false,\n  \"menuAccessMode\": \"PROFILE\",\n  \"cityIds\": [\n    1\n  ],\n  \"territoryIds\": [\n    1\n  ],\n  \"productDivisionIds\": [\n    1\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Update User / Role",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "x-api-token",
+                "value": "{{apiToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/users/1001",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "users", "1001"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"profileId\": 1,\n  \"managerExecutiveId\": 1002,\n  \"approvalEnabled\": false,\n  \"menuAccessMode\": \"PROFILE\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Deactivate User",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "x-api-token",
+                "value": "{{apiToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/users/1001",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "users", "1001"]
+            }
+          }
+        },
+        {
+          "name": "Reactivate User",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "x-api-token",
+                "value": "{{apiToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/users/1001/reactivate",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "users", "1001", "reactivate"]
+            }
+          }
+        },
+        {
+          "name": "Admin Request History",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-api-token",
+                "value": "{{apiToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/request-history",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "request-history"]
+            }
+          }
+        },
+        {
+          "name": "My Request History",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-api-token",
+                "value": "{{apiToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/approvals/mine/history",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "approvals", "mine", "history"]
+            }
+          }
+        },
+        {
+          "name": "Bulk Delete Admin History",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "x-api-token",
+                "value": "{{apiToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/request-history/bulk-delete",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "request-history", "bulk-delete"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"historyIds\": [\n    1,\n    2\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "pm.collectionVariables.set('today', new Date().toISOString().slice(0, 10));"
+        ]
+      }
+    }
+  ]
+}

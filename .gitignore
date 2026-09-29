@@ -1,0 +1,85 @@
+# ==========================================
+# Environment / Secrets
+# ==========================================
+**/.env
+**/.env.*
+!**/.env.example
+
+# ==========================================
+# Node.js / React / Backend
+# ==========================================
+**/node_modules/
+**/dist/
+**/coverage/
+**/.eslintcache
+**/npm-debug.log*
+**/yarn-debug.log*
+**/yarn-error.log*
+
+# ==========================================
+# Flutter / Dart
+# ==========================================
+**/.dart_tool/
+**/.flutter-plugins
+**/.flutter-plugins-dependencies
+**/build/
+**/.pub/
+**/.pub-cache/
+
+# Flutter compiled binaries
+**/*.apk
+**/*.aab
+**/*.symbols
+**/*.map.json
+
+# ==========================================
+# Android generated
+# ==========================================
+**/.gradle/
+**/.kotlin/
+**/.cxx/
+**/local.properties
+
+**/android/app/debug/
+**/android/app/profile/
+**/android/app/release/
+
+# ==========================================
+# Android signing / private keys
+# ==========================================
+**/key.properties
+**/*.jks
+**/*.keystore
+
+# ==========================================
+# iOS / macOS generated
+# ==========================================
+**/Pods/
+**/ios/Flutter/.last_build_id
+**/DerivedData/
+
+# ==========================================
+# Runtime uploads
+# ==========================================
+**/uploads/*
+!**/uploads/.gitkeep
+
+# ==========================================
+# Logs / temporary files
+# ==========================================
+**/*.log
+**/*.tmp
+**/*.swp
+
+# ==========================================
+# IDE
+# ==========================================
+**/.idea/
+**/*.iml
+.vscode/
+
+# ==========================================
+# OS generated files
+# ==========================================
+**/.DS_Store
+**/Thumbs.db

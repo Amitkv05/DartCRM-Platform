@@ -1,0 +1,3 @@
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
+export default function ConfirmDialog({ open, onOpenChange, title, description, confirmLabel = "Confirm", variant = "danger", onConfirm, loading }) { return <Dialog open={open} onOpenChange={onOpenChange}><DialogContent className="max-w-md"><DialogTitle>{title}</DialogTitle><DialogDescription>{description}</DialogDescription><div className="mt-6 flex justify-end gap-2"><Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button><Button variant={variant} disabled={loading} onClick={onConfirm}>{loading ? "Working…" : confirmLabel}</Button></div></DialogContent></Dialog>; }

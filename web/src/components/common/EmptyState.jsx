@@ -1,0 +1,2 @@
+import { Inbox } from "lucide-react";
+export default function EmptyState({ title = "No records found", description = "There is nothing to show here yet." }) { return <div className="flex min-h-44 flex-col items-center justify-center rounded-2xl border border-dashed border-slate-300 bg-white p-8 text-center dark:border-slate-700 dark:bg-slate-900"><div className="rounded-full bg-slate-100 p-3 text-slate-500 dark:bg-slate-800"><Inbox size={22}/></div><p className="mt-3 font-semibold">{title}</p><p className="mt-1 max-w-md text-sm text-slate-500">{description}</p></div>; }

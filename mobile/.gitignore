@@ -1,0 +1,37 @@
+# ==========================================
+# Environment variables / secrets
+# ==========================================
+.env
+.env.*
+!.env.example
+
+# ==========================================
+# Android generated / local files
+# ==========================================
+android/.gradle/
+android/.kotlin/
+android/app/.cxx/
+android/local.properties
+
+# ==========================================
+# Android signing credentials
+# ==========================================
+android/key.properties
+*.jks
+*.keystore
+
+# ==========================================
+# iOS / macOS generated dependencies
+# ==========================================
+ios/Pods/
+macos/Pods/
+
+# ==========================================
+# VS Code - optional
+# ==========================================
+.vscode/
+
+# ==========================================
+# OS generated
+# ==========================================
+Thumbs.db
