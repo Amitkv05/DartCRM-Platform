@@ -1,23 +1,32 @@
 DartCRM Portfolio Source Code License
+
 Copyright (c) 2026 Amit Kumar
 All Rights Reserved.
 
-This source code is made available for portfolio review, recruitment evaluation,
-educational inspection, and demonstration purposes only.
+This source code is made available solely for portfolio review,
+recruitment evaluation, educational inspection, and demonstration purposes.
 
-No permission is granted to copy, reproduce, modify, redistribute, sublicense,
-sell, publish, deploy, or use this source code, in whole or in substantial part,
-for commercial or production purposes without prior written permission from the
-copyright holder.
+Permission is granted to view, download, or clone this repository solely
+for private, non-commercial evaluation or educational review.
 
-Viewing this repository does not transfer ownership of the source code or grant
-any patent, trademark, copyright, or other intellectual-property rights.
+No permission is granted to reproduce, modify, redistribute, sublicense,
+sell, publish, publicly host, deploy, commercially use, or incorporate
+this source code, in whole or in substantial part, into another product,
+project, service, or application without prior written permission from
+the copyright holder.
 
-Third-party libraries, frameworks, assets, trademarks, and other materials remain
-subject to their respective licenses and ownership terms.
+Viewing, downloading, or cloning this repository does not transfer
+ownership of the source code or grant any patent, trademark, copyright,
+or other intellectual-property rights beyond the limited evaluation
+permission expressly stated above.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE, AND NON-INFRINGEMENT. IN NO EVENT SHALL THE
-COPYRIGHT HOLDER BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER LIABILITY ARISING
-FROM, OUT OF, OR IN CONNECTION WITH THE SOFTWARE OR THE USE OF THE SOFTWARE.
+Third-party libraries, frameworks, assets, trademarks, and other
+materials remain subject to their respective licenses and ownership terms.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NON-INFRINGEMENT.
+
+IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY CLAIM, DAMAGES,
+OR OTHER LIABILITY ARISING FROM, OUT OF, OR IN CONNECTION WITH THE
+SOFTWARE OR THE USE OF THE SOFTWARE.
