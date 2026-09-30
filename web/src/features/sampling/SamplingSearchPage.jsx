@@ -12,7 +12,7 @@ import { Select } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 
-export function samplingTypeInfo(customerType = "SCHOOL") {
+function samplingTypeInfo(customerType = "SCHOOL") {
   const type = String(customerType || "SCHOOL").toUpperCase();
   if (type === "TRADE")
     return {
