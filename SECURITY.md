@@ -8,7 +8,12 @@ This repository is maintained as a portfolio and engineering showcase. Security 
 
 Do not publish credentials, tokens or vulnerability details in a public GitHub issue.
 
-If GitHub Private Vulnerability Reporting is enabled for this repository, use it to report security issues privately. Otherwise, contact the repository owner through a private channel before sharing technical details.
+Do not include passwords, access tokens, private keys, customer data, or
+other sensitive information in public reports, screenshots, or GitHub issues.
+
+If GitHub Private Vulnerability Reporting is enabled for this repository,
+use it to report security issues privately. Otherwise, contact the repository
+owner through a private channel before sharing technical details.
 
 ## Repository Security Rules
 
