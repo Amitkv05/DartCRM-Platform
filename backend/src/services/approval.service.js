@@ -22,45 +22,95 @@ async function assertApprovalEnabled(executiveId, executor = db) {
 }
 
 export async function createApproval({ moduleName, entityId, requestNumber, requestedByExecutiveId }, executor = db) {
+  // One module/entity pair is unique in the database. A terminal REJECTED request
+  // must therefore be reopened instead of inserting a second approval row.
+  const [existingRows] = await executor.execute(
+    `SELECT * FROM approval_requests
+     WHERE module_name = ? AND entity_id = ?
+     LIMIT 1 FOR UPDATE`,
+    [moduleName, entityId]
+  );
+  const existing = existingRows[0];
+
+  if (existing?.status === "PENDING") {
+    throw new AppError("Approval request is already pending", 409);
+  }
+  if (existing?.status === "APPROVED") {
+    throw new AppError("Approval request is already approved", 409);
+  }
+
   const firstApprover = await getNextEligibleApprover(requestedByExecutiveId, executor);
 
   if (!firstApprover) {
-    const [result] = await executor.execute(
-      `INSERT INTO approval_requests
-        (module_name, entity_id, request_number, requested_by_executive_id,
-         current_approver_executive_id, current_level, status, completed_at)
-       VALUES (?, ?, ?, ?, NULL, 0, 'APPROVED', CURRENT_TIMESTAMP)`,
-      [moduleName, entityId, requestNumber, requestedByExecutiveId]
-    );
+    let approvalId;
+
+    if (existing?.status === "REJECTED") {
+      approvalId = existing.id;
+      await executor.execute(
+        `UPDATE approval_requests
+         SET request_number = ?, requested_by_executive_id = ?,
+             current_approver_executive_id = NULL, current_level = 0,
+             status = 'APPROVED', completed_at = CURRENT_TIMESTAMP,
+             updated_at = CURRENT_TIMESTAMP
+         WHERE id = ?`,
+        [requestNumber, requestedByExecutiveId, approvalId]
+      );
+    } else {
+      const [result] = await executor.execute(
+        `INSERT INTO approval_requests
+          (module_name, entity_id, request_number, requested_by_executive_id,
+           current_approver_executive_id, current_level, status, completed_at)
+         VALUES (?, ?, ?, ?, NULL, 0, 'APPROVED', CURRENT_TIMESTAMP)`,
+        [moduleName, entityId, requestNumber, requestedByExecutiveId]
+      );
+      approvalId = result.insertId;
+    }
+
     await executor.execute(
       `INSERT INTO approval_history
         (approval_request_id, module_name, entity_id, approval_level, action, action_by_executive_id, remarks)
-       VALUES (?, ?, ?, 0, 'SUBMITTED', ?, 'Request submitted'),
+       VALUES (?, ?, ?, 0, 'SUBMITTED', ?, ?),
               (?, ?, ?, 0, 'APPROVED_FINAL', ?, 'Auto-approved because no higher eligible approver exists')`,
-      [result.insertId, moduleName, entityId, requestedByExecutiveId,
-       result.insertId, moduleName, entityId, requestedByExecutiveId]
+      [approvalId, moduleName, entityId, requestedByExecutiveId,
+       existing?.status === "REJECTED" ? "Request resubmitted" : "Request submitted",
+       approvalId, moduleName, entityId, requestedByExecutiveId]
     );
-    await createAdminRequestHistory({
-      approvalRequestId: result.insertId,
-      moduleName,
-      entityId,
-      requestNumber,
-      requestedByExecutiveId,
-      currentApproverExecutiveId: null,
-      currentLevel: 0,
-      status: "APPROVED",
-    }, executor);
-    await updateAdminRequestHistory({
-      approvalRequestId: result.insertId,
-      status: "APPROVED",
-      currentApproverExecutiveId: null,
-      currentLevel: 0,
-      lastAction: "APPROVED_FINAL",
-      lastActionByExecutiveId: requestedByExecutiveId,
-      lastActionLevel: 0,
-      remarks: "Auto-approved because no higher eligible approver exists",
-    }, executor);
-    return { autoApproved: true, approvalId: result.insertId, currentApprover: null, level: 0 };
+
+    if (existing?.status === "REJECTED") {
+      await updateAdminRequestHistory({
+        approvalRequestId: approvalId,
+        status: "APPROVED",
+        currentApproverExecutiveId: null,
+        currentLevel: 0,
+        lastAction: "APPROVED_FINAL",
+        lastActionByExecutiveId: requestedByExecutiveId,
+        lastActionLevel: 0,
+        remarks: "Auto-approved because no higher eligible approver exists",
+      }, executor);
+    } else {
+      await createAdminRequestHistory({
+        approvalRequestId: approvalId,
+        moduleName,
+        entityId,
+        requestNumber,
+        requestedByExecutiveId,
+        currentApproverExecutiveId: null,
+        currentLevel: 0,
+        status: "APPROVED",
+      }, executor);
+      await updateAdminRequestHistory({
+        approvalRequestId: approvalId,
+        status: "APPROVED",
+        currentApproverExecutiveId: null,
+        currentLevel: 0,
+        lastAction: "APPROVED_FINAL",
+        lastActionByExecutiveId: requestedByExecutiveId,
+        lastActionLevel: 0,
+        remarks: "Auto-approved because no higher eligible approver exists",
+      }, executor);
+    }
+
+    return { autoApproved: true, approvalId, currentApprover: null, level: 0 };
   }
 
   const firstApproverId = Number.parseInt(firstApprover.id, 10);
@@ -69,30 +119,59 @@ export async function createApproval({ moduleName, entityId, requestNumber, requ
     throw new AppError("Approver hierarchy/profile configuration is incomplete", 500);
   }
 
-  const [result] = await executor.execute(
-    `INSERT INTO approval_requests
-      (module_name, entity_id, request_number, requested_by_executive_id, current_approver_executive_id, current_level, status)
-     VALUES (?, ?, ?, ?, ?, ?, 'PENDING')`,
-    [moduleName, entityId, requestNumber, requestedByExecutiveId, firstApproverId, firstLevel]
-  );
+  let approvalId;
+  if (existing?.status === "REJECTED") {
+    approvalId = existing.id;
+    await executor.execute(
+      `UPDATE approval_requests
+       SET request_number = ?, requested_by_executive_id = ?,
+           current_approver_executive_id = ?, current_level = ?,
+           status = 'PENDING', completed_at = NULL,
+           updated_at = CURRENT_TIMESTAMP
+       WHERE id = ?`,
+      [requestNumber, requestedByExecutiveId, firstApproverId, firstLevel, approvalId]
+    );
+  } else {
+    const [result] = await executor.execute(
+      `INSERT INTO approval_requests
+        (module_name, entity_id, request_number, requested_by_executive_id, current_approver_executive_id, current_level, status)
+       VALUES (?, ?, ?, ?, ?, ?, 'PENDING')`,
+      [moduleName, entityId, requestNumber, requestedByExecutiveId, firstApproverId, firstLevel]
+    );
+    approvalId = result.insertId;
+  }
 
   await executor.execute(
     `INSERT INTO approval_history
       (approval_request_id, module_name, entity_id, approval_level, action, action_by_executive_id, remarks)
-     VALUES (?, ?, ?, 0, 'SUBMITTED', ?, 'Request submitted')`,
-    [result.insertId, moduleName, entityId, requestedByExecutiveId]
+     VALUES (?, ?, ?, 0, 'SUBMITTED', ?, ?)`,
+    [approvalId, moduleName, entityId, requestedByExecutiveId,
+     existing?.status === "REJECTED" ? "Request resubmitted" : "Request submitted"]
   );
 
-  await createAdminRequestHistory({
-    approvalRequestId: result.insertId,
-    moduleName,
-    entityId,
-    requestNumber,
-    requestedByExecutiveId,
-    currentApproverExecutiveId: firstApproverId,
-    currentLevel: firstLevel,
-    status: "PENDING",
-  }, executor);
+  if (existing?.status === "REJECTED") {
+    await updateAdminRequestHistory({
+      approvalRequestId: approvalId,
+      status: "PENDING",
+      currentApproverExecutiveId: firstApproverId,
+      currentLevel: firstLevel,
+      lastAction: "SUBMITTED",
+      lastActionByExecutiveId: requestedByExecutiveId,
+      lastActionLevel: 0,
+      remarks: "Request resubmitted",
+    }, executor);
+  } else {
+    await createAdminRequestHistory({
+      approvalRequestId: approvalId,
+      moduleName,
+      entityId,
+      requestNumber,
+      requestedByExecutiveId,
+      currentApproverExecutiveId: firstApproverId,
+      currentLevel: firstLevel,
+      status: "PENDING",
+    }, executor);
+  }
 
   await createNotification({
     executiveId: firstApproverId,
@@ -102,7 +181,7 @@ export async function createApproval({ moduleName, entityId, requestNumber, requ
     entityId,
   }, executor);
 
-  return { autoApproved: false, approvalId: result.insertId, currentApprover: firstApproverId, level: firstLevel };
+  return { autoApproved: false, approvalId, currentApprover: firstApproverId, level: firstLevel };
 }
 
 export async function getApprovalForUpdate(approvalId, executor = db) {

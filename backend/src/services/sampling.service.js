@@ -2,6 +2,7 @@ import { AppError } from "../utils/AppError.js";
 import { nextRequestNumber } from "./requestNumber.service.js";
 import { createApproval } from "./approval.service.js";
 import { getSetupMap } from "./setup.service.js";
+import { assertCanViewExecutive } from "./hierarchy.service.js";
 
 function nullable(value) {
   return value === undefined || value === "" ? null : value;
@@ -118,6 +119,7 @@ export async function createCustomerSampling(payload, actor, executor, originVis
   if (!Array.isArray(payload.items) || payload.items.length === 0) throw new AppError("items are required", 400);
 
   const executiveId = Number(payload.executiveId || actor.executiveId);
+  await assertCanViewExecutive(actor.executiveId, executiveId, executor);
   const { customerId, shipmentModeId } = await validateSamplingReferences(payload, executiveId, executor);
 
   const normalizedItems = [];

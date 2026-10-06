@@ -4,6 +4,7 @@ import { getSetupMap } from "../../services/setup.service.js";
 import { nextRequestNumber } from "../../services/requestNumber.service.js";
 import { createApproval } from "../../services/approval.service.js";
 import { budgetSnapshot } from "../../services/sampling.service.js";
+import { assertCanViewExecutive } from "../../services/hierarchy.service.js";
 
 export async function masterData(req, res) {
   const [shipmentModes] = await db.execute("SELECT id AS shipment_mode_id, name AS shipment_mode FROM shipment_modes WHERE is_active = 1 ORDER BY id");
@@ -27,6 +28,8 @@ export async function tradeAddresses(req, res) {
 
 export async function create(req, res) {
   const result = await withTransaction(async (connection) => {
+    const executiveId = Number(req.body.executiveId || req.user.executiveId);
+    await assertCanViewExecutive(req.user.executiveId, executiveId, connection);
     const setup = await getSetupMap(connection);
     const maxQty = Number(setup.SamplingSelfStockMaxQtyAllowed || 999);
     if (!Array.isArray(req.body.items) || req.body.items.length === 0) throw new AppError("items are required", 400);
@@ -38,7 +41,7 @@ export async function create(req, res) {
       if (!books[0]) throw new AppError(`Book ${item.bookId} not found`, 404);
       normalizedItems.push({ ...item, requestedQty: qty, unitPrice: Number(books[0].list_price) });
     }
-    const budget = await budgetSnapshot(req.body.executiveId || req.user.executiveId, normalizedItems, connection);
+    const budget = await budgetSnapshot(executiveId, normalizedItems, connection);
     const requestNumber = await nextRequestNumber("SS", connection);
     const [insert] = await connection.execute(
       `INSERT INTO self_stock_requests
@@ -46,7 +49,7 @@ export async function create(req, res) {
         shipment_mode_id, shipping_instructions, request_remarks, in_budget, available_budget, requested_budget,
         request_status, approval_status)
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'PENDING_APPROVAL', 'PENDING')`,
-      [requestNumber, req.body.executiveId || req.user.executiveId, req.user.userId, req.body.tradeCustomerId || null,
+      [requestNumber, executiveId, req.user.userId, req.body.tradeCustomerId || null,
        req.body.shipTo, req.body.shippingAddress || null, req.body.shipmentModeId,
        req.body.shippingInstructions || null, req.body.remarks || null, budget.inBudget ? 1 : 0,
        budget.availableBudget, budget.requestedBudget]
@@ -63,7 +66,7 @@ export async function create(req, res) {
       moduleName: "SELF_STOCK",
       entityId: insert.insertId,
       requestNumber,
-      requestedByExecutiveId: req.body.executiveId || req.user.executiveId,
+      requestedByExecutiveId: executiveId,
     }, connection);
     if (approval.autoApproved) {
       await connection.execute("UPDATE self_stock_requests SET request_status='APPROVED', approval_status='APPROVED' WHERE id = ?", [insert.insertId]);
@@ -104,6 +107,7 @@ export async function requestDetails(req, res) {
      WHERE ss.id = ? LIMIT 1`, [req.params.id]
   );
   if (!rows[0]) throw new AppError("Self Stock request not found", 404);
+  await assertCanViewExecutive(req.user.executiveId, rows[0].executive_id);
   const [items] = await db.execute(
     `SELECT i.*, b.title, b.isbn, b.author, b.book_type, b.book_num, s.name AS series_name
      FROM self_stock_request_items i JOIN books b ON b.id = i.book_id

@@ -1,7 +1,7 @@
 import { db, withTransaction } from "../../config/db.js";
 import { AppError } from "../../utils/AppError.js";
 import { requireFields } from "../../utils/validation.js";
-import { getDownHierarchy, getUpHierarchy } from "../../services/hierarchy.service.js";
+import { getDownHierarchy, getUpHierarchy, assertCanViewExecutive } from "../../services/hierarchy.service.js";
 import { getSetupMap } from "../../services/setup.service.js";
 import { createApproval } from "../../services/approval.service.js";
 import { createCustomerSampling } from "../../services/sampling.service.js";
@@ -369,6 +369,8 @@ export async function createVisit(req, res) {
   ]);
 
   const result = await withTransaction(async (connection) => {
+    const executiveId = Number(req.body.executiveId || req.user.executiveId);
+    await assertCanViewExecutive(req.user.executiveId, executiveId, connection);
     await validateVisitReferences(req.body, connection);
 
     const setup = await getSetupMap(connection);
@@ -385,7 +387,7 @@ export async function createVisit(req, res) {
     await validateVisitDate(
       req.body.visitDate,
       req.body.backdateRequestId,
-      req.user.executiveId,
+      executiveId,
       connection
     );
 
@@ -398,7 +400,7 @@ export async function createVisit(req, res) {
         competing_data_payload, backdate_request_id, created_by_user_id)
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
-        req.body.executiveId || req.user.executiveId,
+        executiveId,
         req.user.executiveId,
         req.body.customerId,
         String(req.body.customerType).toUpperCase(),

@@ -1,9 +1,11 @@
 import { db } from "../../config/db.js";
 import { AppError } from "../../utils/AppError.js";
 import { getSetupMap } from "../../services/setup.service.js";
+import { assertCanViewExecutive } from "../../services/hierarchy.service.js";
 
 export async function getPlanList(req, res) {
   const executiveId = Number(req.query.executiveId || req.user.executiveId);
+  await assertCanViewExecutive(req.user.executiveId, executiveId);
   const [rows] = await db.execute(
     `SELECT vp.id, vp.plan_date, vp.plan_type, vp.visit_purpose_id, vpr.name AS visit_purpose,
             c.id AS customer_id, c.customer_code, c.customer_name, c.customer_type, c.address,
@@ -27,6 +29,8 @@ export async function getPlanList(req, res) {
 
 export async function createPlan(req, res) {
   if (!req.body.customerId || !req.body.planDate) throw new AppError("customerId and planDate are required", 400);
+  const executiveId = Number(req.body.executiveId || req.user.executiveId);
+  await assertCanViewExecutive(req.user.executiveId, executiveId);
   const planType = String(req.body.planType || "VISIT").trim().toUpperCase();
   if (planType === "TRAVEL") {
     const setup = await getSetupMap();
@@ -42,7 +46,7 @@ export async function createPlan(req, res) {
   const [result] = await db.execute(
     `INSERT INTO visit_plans (executive_id, customer_id, visit_purpose_id, plan_date, plan_type, remarks, created_by_user_id)
      VALUES (?, ?, ?, ?, ?, ?, ?)`,
-    [req.body.executiveId || req.user.executiveId, req.body.customerId, req.body.visitPurposeId || null,
+    [executiveId, req.body.customerId, req.body.visitPurposeId || null,
      req.body.planDate, planType, req.body.remarks || null, req.user.userId]
   );
   res.status(201).json({ status: "success", planId: result.insertId });

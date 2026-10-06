@@ -257,6 +257,28 @@ export async function getCustomer(req, res) {
   );
   const customer = rows[0];
   if (!customer) throw new AppError("Customer not found", 404);
+
+  // V4 rule: only finalized/validated active customers are globally visible.
+  // Pending/rejected records remain restricted to the viewer's down-hierarchy assignments.
+  const globallyVisible =
+    customer.validation_status === "VALIDATED" && customer.customer_status === "ACTIVE";
+
+  if (!globallyVisible) {
+    const down = await getDownHierarchy(req.user.executiveId);
+    const placeholders = down.map(() => "?").join(",");
+    const [accessRows] = await db.execute(
+      `SELECT 1
+       FROM customer_executives
+       WHERE customer_id = ?
+         AND executive_id IN (${placeholders})
+       LIMIT 1`,
+      [req.params.id, ...down]
+    );
+    if (!accessRows[0]) {
+      throw new AppError("You cannot view this customer", 403);
+    }
+  }
+
   const [contacts] = await db.execute("SELECT * FROM customer_contacts WHERE customer_id = ? ORDER BY primary_contact DESC, id", [req.params.id]);
   const [categories] = await db.execute(
     `SELECT cc.id, cc.name FROM customer_category_map m JOIN customer_categories cc ON cc.id = m.category_id WHERE m.customer_id = ?`, [req.params.id]

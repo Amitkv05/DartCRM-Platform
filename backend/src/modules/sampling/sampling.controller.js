@@ -1,6 +1,7 @@
 import { db, withTransaction } from "../../config/db.js";
 import { AppError } from "../../utils/AppError.js";
 import { createCustomerSampling } from "../../services/sampling.service.js";
+import { assertCanViewExecutive } from "../../services/hierarchy.service.js";
 
 export async function samplingDetails(req, res) {
   if (!req.query.customerId) throw new AppError("customerId is required", 400);
@@ -155,6 +156,7 @@ export async function requestDetails(req, res) {
      WHERE csr.id = ? LIMIT 1`, [req.params.id]
   );
   if (!rows[0]) throw new AppError("Sampling request not found", 404);
+  await assertCanViewExecutive(req.user.executiveId, rows[0].executive_id);
   const [items] = await db.execute(
     `SELECT i.*, b.title, b.isbn, b.author, b.book_type, b.book_num, s.name AS series_name,
             st.name AS sampling_type
