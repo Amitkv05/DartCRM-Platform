@@ -12,6 +12,20 @@ function refreshExpiryDate() {
   return new Date(Date.now() + days * 24 * 60 * 60 * 1000);
 }
 
+async function passwordMatches(password, storedHash) {
+  if (!storedHash) return false;
+  if (storedHash.startsWith("sha256$")) {
+    return storedHash === `sha256$${sha256(password)}`;
+  }
+  return bcrypt.compare(password, storedHash);
+}
+
+function assertNewPassword(password) {
+  if (String(password || "").length < 8) {
+    throw new AppError("New password must be at least 8 characters", 400);
+  }
+}
+
 export async function createApiToken(req, res) {
   requireFields(req.body, ["email", "secret"]);
   const [rows] = await db.execute(
@@ -50,9 +64,7 @@ export async function login(req, res) {
   );
   const record = rows[0];
   if (!record || record.user_status !== "ACTIVE") throw new AppError("Invalid email or password", 401);
-  const passwordOk = record.password_hash.startsWith("sha256$")
-    ? record.password_hash === `sha256$${sha256(req.body.password)}`
-    : await bcrypt.compare(req.body.password, record.password_hash);
+  const passwordOk = await passwordMatches(req.body.password, record.password_hash);
   if (!passwordOk) throw new AppError("Invalid email or password", 401);
 
   const payload = {
@@ -174,6 +186,7 @@ export async function forgotPassword(req, res) {
 
 export async function resetPassword(req, res) {
   requireFields(req.body, ["resetToken", "newPassword"]);
+  assertNewPassword(req.body.newPassword);
   await withTransaction(async (connection) => {
     const [rows] = await connection.execute(
       "SELECT * FROM password_reset_tokens WHERE token_hash = ? AND used_at IS NULL FOR UPDATE",
@@ -191,8 +204,9 @@ export async function resetPassword(req, res) {
 
 export async function changePassword(req, res) {
   requireFields(req.body, ["currentPassword", "newPassword"]);
+  assertNewPassword(req.body.newPassword);
   const [rows] = await db.execute("SELECT password_hash FROM users WHERE id = ? LIMIT 1", [req.user.userId]);
-  if (!rows[0] || !(await bcrypt.compare(req.body.currentPassword, rows[0].password_hash))) {
+  if (!rows[0] || !(await passwordMatches(req.body.currentPassword, rows[0].password_hash))) {
     throw new AppError("Current password is incorrect", 400);
   }
   const hash = await bcrypt.hash(req.body.newPassword, 12);

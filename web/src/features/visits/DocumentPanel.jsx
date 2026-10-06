@@ -38,14 +38,14 @@ export default function DocumentPanel({ documents, onChange }) {
             <p className="mb-1.5 text-[10px] font-bold uppercase tracking-[.08em] text-slate-500">Document name</p>
             <Input id="visit-doc-name" placeholder="Document Name (optional)" />
             <p className="mt-2 text-[9px] leading-4 text-slate-600">
-              If left empty, DartCRM will use the selected file name. Accepted: JPG, PNG, PDF, DOC, DOCX, XLS, XLSX.
+              If left empty, DartCRM will use the selected file name. Accepted: JPG, JPEG, PNG, PDF.
             </p>
           </div>
 
           <AnimatedFileUpload
             maxSizeMB={10}
             disabled={upload.isPending}
-            accept=".jpg,.jpeg,.png,.pdf,.doc,.docx,.xls,.xlsx"
+            accept=".jpg,.jpeg,.png,.pdf"
             onValidationError={(message) => toast.error(message)}
             onUpload={async (file) => {
               const name = document.getElementById("visit-doc-name")?.value?.trim() || file.name;

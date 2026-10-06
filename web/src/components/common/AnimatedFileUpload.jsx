@@ -18,7 +18,7 @@ function prettyBytes(bytes) {
 }
 
 export default function AnimatedFileUpload({
-  accept = ".jpg,.jpeg,.png,.pdf,.doc,.docx,.xls,.xlsx",
+  accept = ".jpg,.jpeg,.png,.pdf",
   maxSizeMB = 10,
   disabled = false,
   onUpload,
@@ -60,6 +60,35 @@ export default function AnimatedFileUpload({
 
   const selectFile = (candidate) => {
     if (!candidate || disabled || status === "uploading") return;
+    const acceptedRules = String(accept || "")
+      .split(",")
+      .map((value) => value.trim().toLowerCase())
+      .filter(Boolean);
+
+    if (acceptedRules.length) {
+      const fileName = String(candidate.name || "").toLowerCase();
+      const mimeType = String(candidate.type || "").toLowerCase();
+      const extension = fileName.includes(".")
+        ? `.${fileName.split(".").pop()}`
+        : "";
+
+      const allowed = acceptedRules.some((rule) => {
+        if (rule.startsWith(".")) return extension === rule;
+        if (rule.endsWith("/*")) {
+          return mimeType.startsWith(rule.slice(0, -1));
+        }
+        return mimeType === rule;
+      });
+
+      if (!allowed) {
+        const text = "Only JPG, JPEG, PNG and PDF files are allowed.";
+        setStatus("error");
+        setMessage(text);
+        onValidationError?.(text);
+        return;
+      }
+    }
+
     const maxBytes = maxSizeMB * 1024 * 1024;
     if (candidate.size > maxBytes) {
       const text = `File size cannot exceed ${maxSizeMB} MB.`;
@@ -154,7 +183,7 @@ export default function AnimatedFileUpload({
         {!file ? (
           <div className="crm-upload-empty">
             <div className="crm-upload-icon"><UploadCloud size={25} /></div>
-            <p className="crm-upload-title">Drag & drop images, videos, or any file</p>
+            <p className="crm-upload-title">Drag & drop a JPG, PNG or PDF file</p>
             <p className="crm-upload-subtitle">or <span>browse files</span> from your computer</p>
             <span className="crm-upload-limit">Maximum file size: {maxSizeMB} MB</span>
           </div>
