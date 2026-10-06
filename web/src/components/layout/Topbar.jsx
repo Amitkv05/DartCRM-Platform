@@ -21,15 +21,11 @@ export default function Topbar() {
     queryFn: notificationApi.list,
     refetchInterval: 60_000,
   });
-  const unread = (data?.notifications || []).filter(
-    (n) => !n.is_read && !n.read_at,
-  ).length;
+  const unread = (data?.notifications || []).filter((n) => !n.is_read && !n.read_at).length;
   const logout = useMutation({
     mutationFn: () => {
       const refreshToken = tokenStorage.getRefreshToken();
-      return refreshToken
-        ? authApi.logout(refreshToken)
-        : Promise.resolve({ status: "success" });
+      return refreshToken ? authApi.logout(refreshToken) : Promise.resolve({ status: "success" });
     },
     onSettled: () => {
       dispatch(clearSession());
@@ -39,87 +35,73 @@ export default function Topbar() {
   });
 
   return (
-    <header className="sticky top-0 z-30 flex h-16 items-center gap-3 border-b border-slate-200 bg-white/95 px-4 backdrop-blur dark:border-slate-800 dark:bg-slate-950/90 lg:px-6">
-      <Button
-        variant="ghost"
-        size="icon"
-        className="lg:hidden"
-        onClick={() => dispatch(toggleSidebar())}
-      >
-        <Menu size={20} />
+    <header className="crm-topbar sticky top-3 z-30 mx-3 mt-3 flex min-h-[58px] items-center gap-2 px-2.5 py-2 sm:mx-5 lg:mx-6 lg:mt-4">
+      <Button variant="ghost" size="icon" className="shrink-0 lg:hidden" onClick={() => dispatch(toggleSidebar())}>
+        <Menu size={18} />
       </Button>
-      <div className="relative hidden flex-1 sm:block sm:max-w-md">
-        <Search
-          className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
-          size={17}
-        />
+
+      <div className="crm-search relative min-w-0 flex-1 sm:max-w-xl">
+        <Search className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-600" size={15} />
         <input
-          className="h-10 w-full rounded-xl border border-slate-200 bg-slate-50 pl-10 pr-3 text-sm outline-none focus:border-brand-400 focus:ring-2 focus:ring-brand-100 dark:border-slate-800 dark:bg-slate-900"
-          placeholder="Search CRM…"
+          className="h-10 w-full rounded-[10px] border border-transparent bg-transparent pl-9 pr-3 text-[11px] text-slate-200 outline-none transition placeholder:text-slate-600 hover:bg-white/[.02] focus:border-white/[.06] focus:bg-white/[.035]"
+          placeholder="Search CRM records…"
           onKeyDown={(e) => {
-            if (e.key === "Enter" && e.currentTarget.value.trim())
-              navigate(
-                `/customers/school?search=${encodeURIComponent(e.currentTarget.value.trim())}`,
-              );
+            if (e.key === "Enter" && e.currentTarget.value.trim()) {
+              navigate(`/customers/school?search=${encodeURIComponent(e.currentTarget.value.trim())}`);
+            }
           }}
         />
       </div>
-      <div className="ml-auto flex items-center gap-1.5">
+
+      <div className="hidden items-center gap-1 rounded-[9px] border border-white/[.055] bg-white/[.018] p-1 md:flex">
+        <span className="rounded-md bg-white/[.055] px-2.5 py-1.5 text-[8px] font-semibold uppercase tracking-[.08em] text-slate-300">Live</span>
+        <span className="px-2 text-[8px] font-medium text-slate-600">Operations</span>
+      </div>
+
+      <div className="ml-auto flex items-center gap-1">
         <Button
           variant="ghost"
           size="icon"
-          onClick={() =>
-            dispatch(setTheme(theme === "dark" ? "light" : "dark"))
-          }
+          className="h-9 w-9"
+          aria-label="Toggle theme"
+          onClick={() => dispatch(setTheme(theme === "dark" ? "light" : "dark"))}
         >
-          {theme === "dark" ? <Sun size={18} /> : <Moon size={18} />}
+          {theme === "dark" ? <Sun size={16} /> : <Moon size={16} />}
         </Button>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="relative"
-          onClick={() => navigate("/notifications")}
-        >
-          <Bell size={18} />
-          {unread > 0 && (
-            <span className="absolute right-1 top-1 min-w-4 rounded-full bg-red-500 px-1 text-center text-[10px] font-bold leading-4 text-white">
-              {Math.min(unread, 99)}
-            </span>
-          )}
+        <Button variant="ghost" size="icon" className="relative h-9 w-9" onClick={() => navigate("/notifications")}>
+          <Bell size={16} />
+          {unread > 0 && <span className="crm-notification-dot">{Math.min(unread, 99)}</span>}
         </Button>
+
         <DropdownMenu.Root>
           <DropdownMenu.Trigger asChild>
-            <button className="ml-1 flex items-center gap-2 rounded-xl px-2 py-1.5 hover:bg-slate-100 dark:hover:bg-slate-800">
-              <div className="grid h-9 w-9 place-items-center rounded-full bg-brand-900 text-sm font-bold text-white">
-                {initials(user?.executiveName)}
-              </div>
-              <div className="hidden text-left md:block">
-                <p className="max-w-36 truncate text-sm font-semibold">
-                  {user?.executiveName}
-                </p>
-                <p className="text-xs text-slate-500">{user?.profileCode}</p>
+            <button className="ml-1 flex items-center gap-2 rounded-[10px] border border-transparent px-1.5 py-1 transition hover:border-white/[.06] hover:bg-white/[.035]">
+              <div className="crm-user-avatar h-8 w-8 rounded-lg text-[10px]">{initials(user?.executiveName)}</div>
+              <div className="hidden max-w-36 text-left md:block">
+                <p className="truncate text-[10px] font-bold text-slate-200">{user?.executiveName}</p>
+                <p className="mt-0.5 text-[8px] uppercase tracking-[.08em] text-slate-600">{user?.profileCode}</p>
               </div>
             </button>
           </DropdownMenu.Trigger>
           <DropdownMenu.Portal>
             <DropdownMenu.Content
-              sideOffset={8}
+              sideOffset={9}
               align="end"
-              className="z-50 min-w-52 rounded-xl border border-slate-200 bg-white p-1.5 shadow-xl dark:border-slate-800 dark:bg-slate-900"
+              className="z-50 min-w-52 rounded-[12px] border border-white/[.09] bg-[#111519]/95 p-1.5 text-slate-300 shadow-2xl backdrop-blur-xl"
             >
               <DropdownMenu.Item
-                className="flex cursor-pointer items-center gap-2 rounded-lg px-3 py-2 text-sm outline-none hover:bg-slate-100 dark:hover:bg-slate-800"
+                className="flex cursor-pointer items-center gap-2 rounded-lg px-3 py-2 text-[11px] outline-none transition hover:bg-white/[.055] hover:text-white"
                 onSelect={() => navigate("/settings")}
               >
-                <UserRound size={16} />
+                <UserRound size={15} />
                 Profile & Settings
               </DropdownMenu.Item>
-              <DropdownMenu.Separator className="my-1 h-px bg-slate-100 dark:bg-slate-800" />
+              <DropdownMenu.Separator className="my-1 h-px bg-white/[.06]" />
               <DropdownMenu.Item
-                className="flex cursor-pointer items-center gap-2 rounded-lg px-3 py-2 text-sm text-red-600 outline-none hover:bg-red-50"
+                className="flex cursor-pointer items-center gap-2 rounded-lg px-3 py-2 text-[11px] text-red-300 outline-none transition hover:bg-red-500/10"
                 onSelect={() => logout.mutate()}
               >
-                <LogOut size={16} />
+                <LogOut size={15} />
                 Sign out
               </DropdownMenu.Item>
             </DropdownMenu.Content>

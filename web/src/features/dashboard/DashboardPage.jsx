@@ -12,7 +12,7 @@ import LoadingState from "@/components/common/LoadingState";
 import { Link } from "react-router-dom";
 import { formatDate } from "@/utils/format";
 
-const colors = ["#2563eb", "#8b5cf6", "#10b981", "#f59e0b"];
+const colors = ["#35c9ec", "#8c6df2", "#47db7c", "#ff8c61"];
 
 export default function DashboardPage() {
   const user = useSelector((s) => s.auth.user);
@@ -43,14 +43,14 @@ export default function DashboardPage() {
     <PageHeader title={`Welcome, ${user?.executiveName || "Executive"}`} description="Live operational overview from CRM Backend V4." actions={<Button asChild variant="outline"><Link to="/requests/my-history">View Request History <ArrowRight size={15}/></Link></Button>}/>
     <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
       <StatCard icon={Building2} label="Customers" value={customers.length} helper="Validated & visible"/>
-      <StatCard icon={ClipboardCheck} label="Pending Approvals" value={approvals.length} helper={user?.approvalEnabled ? "Assigned to you" : "Request-only role"} tone="bg-amber-50 text-amber-700 dark:bg-amber-950/50 dark:text-amber-300"/>
-      <StatCard icon={Package} label="Sampling Requests" value={sampling.length} helper={`${sampling.filter((x) => String(x.request_status).includes("PENDING")).length} pending`} tone="bg-emerald-50 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300"/>
-      <StatCard icon={Boxes} label="Self-Stock" value={selfStock.length} helper={`${selfStock.filter((x) => String(x.request_status).includes("PENDING")).length} pending`} tone="bg-violet-50 text-violet-700 dark:bg-violet-950/50 dark:text-violet-300"/>
-      <StatCard icon={Bell} label="Unread Alerts" value={unread} helper="Notifications" tone="bg-red-50 text-red-700 dark:bg-red-950/50 dark:text-red-300"/>
+      <StatCard icon={ClipboardCheck} label="Pending Approvals" value={approvals.length} helper={user?.approvalEnabled ? "Assigned to you" : "Request-only role"} tone="text-amber-300"/>
+      <StatCard icon={Package} label="Sampling Requests" value={sampling.length} helper={`${sampling.filter((x) => String(x.request_status).includes("PENDING")).length} pending`} tone="text-emerald-300"/>
+      <StatCard icon={Boxes} label="Self-Stock" value={selfStock.length} helper={`${selfStock.filter((x) => String(x.request_status).includes("PENDING")).length} pending`} tone="text-violet-300"/>
+      <StatCard icon={Bell} label="Unread Alerts" value={unread} helper="Notifications" tone="text-red-300"/>
     </div>
 
     <div className="mt-5 grid gap-5 xl:grid-cols-[1.3fr_.7fr]">
-      <Card><CardHeader><CardTitle>Request Performance</CardTitle><CardDescription>Pending vs approved requests currently visible to your account.</CardDescription></CardHeader><CardContent><div className="h-72"><ResponsiveContainer width="100%" height="100%"><BarChart data={requestBars}><CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0"/><XAxis dataKey="name"/><YAxis allowDecimals={false}/><Tooltip/><Bar dataKey="Approved" fill="#10b981" radius={[6,6,0,0]}/><Bar dataKey="Pending" fill="#f59e0b" radius={[6,6,0,0]}/></BarChart></ResponsiveContainer></div></CardContent></Card>
+      <Card><CardHeader><CardTitle>Request Performance</CardTitle><CardDescription>Pending vs approved requests currently visible to your account.</CardDescription></CardHeader><CardContent><div className="h-72"><ResponsiveContainer width="100%" height="100%"><BarChart data={requestBars}><CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,.06)"/><XAxis dataKey="name"/><YAxis allowDecimals={false}/><Tooltip/><Bar dataKey="Approved" fill="#47db7c" radius={[6,6,0,0]}/><Bar dataKey="Pending" fill="#ff8c61" radius={[6,6,0,0]}/></BarChart></ResponsiveContainer></div></CardContent></Card>
       <Card><CardHeader><CardTitle>Customer Mix</CardTitle><CardDescription>Visible customer master distribution.</CardDescription></CardHeader><CardContent><div className="h-72"><ResponsiveContainer width="100%" height="100%"><PieChart><Pie data={customerTypes} dataKey="value" nameKey="name" innerRadius={58} outerRadius={88} paddingAngle={3}>{customerTypes.map((_, i) => <Cell key={i} fill={colors[i % colors.length]}/>)}</Pie><Tooltip/></PieChart></ResponsiveContainer></div><div className="grid grid-cols-2 gap-2">{customerTypes.map((x,i) => <div key={x.name} className="flex items-center justify-between rounded-lg bg-slate-50 px-3 py-2 text-sm dark:bg-slate-800"><span className="flex items-center gap-2"><span className="h-2.5 w-2.5 rounded-full" style={{background:colors[i%colors.length]}}/>{x.name}</span><b>{x.value}</b></div>)}</div></CardContent></Card>
     </div>
 

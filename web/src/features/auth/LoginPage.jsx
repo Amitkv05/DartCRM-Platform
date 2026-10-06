@@ -5,7 +5,7 @@ import { Navigate, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Eye, EyeOff, KeyRound, LockKeyhole, Mail, ShieldCheck } from "lucide-react";
+import { Activity, Eye, EyeOff, KeyRound, LockKeyhole, Mail, ShieldCheck, Sparkles } from "lucide-react";
 import { crmBootstrap } from "@/api/apiClient";
 import { authApi, setupApi } from "@/api/crmApi";
 import { setMenus, setSession } from "@/features/auth/authSlice";
@@ -34,18 +34,13 @@ export default function LoginPage() {
 
   const mutation = useMutation({
     mutationFn: async (payload) => {
-      // Explicitly mirrors the Flutter login flow:
-      // 1) ensure/generate shared API token, 2) call user login.
       await crmBootstrap.ensureApiToken();
       return authApi.login(payload);
     },
     onSuccess: async (payload) => {
       dispatch(setSession(payload));
       try {
-        const menuPayload = await queryClient.fetchQuery({
-          queryKey: ["menus"],
-          queryFn: setupApi.menus,
-        });
+        const menuPayload = await queryClient.fetchQuery({ queryKey: ["menus"], queryFn: setupApi.menus });
         dispatch(setMenus(menuPayload?.menus || []));
       } catch {
         // ProtectedRoute retries menu loading, so login itself should not fail
@@ -72,51 +67,79 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="grid min-h-screen lg:grid-cols-[1.1fr_.9fr]">
-      <section className="relative hidden overflow-hidden bg-brand-950 p-12 text-white lg:flex lg:flex-col lg:justify-between">
-        <div className="absolute inset-0 opacity-20 [background-image:radial-gradient(circle_at_20%_20%,#3b82f6_0,transparent_28%),radial-gradient(circle_at_80%_70%,#2563eb_0,transparent_30%)]" />
-        <div className="relative z-10 flex items-center gap-3"><div className="grid h-11 w-11 place-items-center rounded-2xl bg-brand-600 text-xl font-black">D</div><div><p className="text-lg font-black">DartCRM</p><p className="text-xs text-slate-400">Sales & Field Operations Platform</p></div></div>
-        <div className="relative z-10 max-w-xl">
-          <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3 py-1.5 text-xs font-semibold text-blue-200"><ShieldCheck size={15}/>Same V4 auth + hierarchy flow as mobile</div>
-          <h1 className="text-5xl font-black leading-[1.08] tracking-tight">One workspace for customers, visits, sampling and approvals.</h1>
-          <p className="mt-5 max-w-lg text-base leading-7 text-slate-300">The web client automatically creates the shared API token, signs in the executive, refreshes JWTs, loads role menus and reuses the same CRM V4 APIs as the Flutter app.</p>
+    <div className="crm-auth-shell relative grid min-h-screen overflow-hidden lg:grid-cols-[1.08fr_.92fr]">
+      <div className="crm-ambient crm-ambient-cyan" />
+      <div className="crm-ambient crm-ambient-red" />
+      <div className="crm-auth-orbit -left-40 -top-44 h-[520px] w-[520px]" />
+      <div className="crm-auth-orbit -bottom-64 left-[30%] h-[620px] w-[620px]" />
+
+      <section className="relative hidden min-h-screen overflow-hidden p-12 text-white lg:flex lg:flex-col lg:justify-between xl:p-16">
+        <div className="flex items-center gap-3">
+          <div className="crm-brand-mark h-11 w-11 rounded-xl text-base">D</div>
+          <div><p className="text-[15px] font-black tracking-wide">DartCRM</p><p className="mt-1 text-[8px] font-semibold uppercase tracking-[.18em] text-slate-600">Sales & Field Operations</p></div>
         </div>
-        <p className="relative z-10 text-xs text-slate-500">DartCRM Web · React + Vite · CRM Backend V4</p>
+
+        <div className="relative z-10 max-w-[650px] pb-6">
+          <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-emerald-400/10 bg-emerald-400/[.055] px-3 py-1.5 text-[9px] font-semibold text-emerald-300">
+            <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-400" /> CRM V4 secure session
+          </div>
+          <h1 className="max-w-[610px] text-[44px] font-black leading-[1.06] tracking-[-.055em] xl:text-[54px]">One operational command center for your complete field workflow.</h1>
+          <p className="mt-6 max-w-[560px] text-[12px] leading-6 text-slate-500">Customers, plans, visits, sampling, approvals and activity stay connected through the same existing DartCRM APIs—now inside a focused dashboard experience.</p>
+
+          <div className="mt-9 grid max-w-[590px] grid-cols-3 gap-3">
+            {[
+              [ShieldCheck, "Protected", "JWT + API token"],
+              [Activity, "Live", "CRM operations"],
+              [Sparkles, "Unified", "Role-aware workspace"],
+            ].map(([Icon, title, sub]) => (
+              <div key={title} className="rounded-[14px] border border-white/[.07] bg-white/[.025] p-4 backdrop-blur-lg">
+                <Icon size={16} className="text-brand-400" />
+                <p className="mt-4 text-[10px] font-bold text-slate-200">{title}</p>
+                <p className="mt-1 text-[8px] text-slate-600">{sub}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+        <p className="text-[8px] font-semibold uppercase tracking-[.18em] text-slate-700">DartCRM Web · Operations Suite</p>
       </section>
 
-      <section className="flex items-center justify-center bg-slate-50 p-5 dark:bg-slate-950 sm:p-10">
-        <div className="w-full max-w-md">
-          <div className="mb-8 lg:hidden"><div className="flex items-center gap-3"><div className="grid h-10 w-10 place-items-center rounded-xl bg-brand-900 font-black text-white">D</div><p className="text-lg font-black">DartCRM</p></div></div>
-          <div className="rounded-3xl border border-slate-200 bg-white p-7 shadow-soft dark:border-slate-800 dark:bg-slate-900 sm:p-9">
-            <h2 className="text-2xl font-black tracking-tight">Welcome back</h2>
-            <p className="mt-2 text-sm text-slate-500">Sign in with your CRM executive account. API token generation is automatic.</p>
-            <form className="mt-7 space-y-5" onSubmit={handleSubmit((values) => mutation.mutate(values))}>
+      <section className="relative flex items-center justify-center p-5 sm:p-10 lg:border-l lg:border-white/[.045]">
+        <div className="w-full max-w-[440px]">
+          <div className="mb-7 flex items-center gap-3 lg:hidden"><div className="crm-brand-mark h-10 w-10">D</div><div><p className="text-[14px] font-black text-white">DartCRM</p><p className="text-[8px] uppercase tracking-[.15em] text-slate-600">Operations Suite</p></div></div>
+          <div className="crm-auth-panel rounded-[22px] p-6 sm:p-8">
+            <div className="mb-7">
+              <div className="mb-4 grid h-10 w-10 place-items-center rounded-[11px] border border-brand-400/15 bg-brand-400/[.08] text-brand-300"><LockKeyhole size={18}/></div>
+              <p className="text-[8px] font-bold uppercase tracking-[.18em] text-slate-600">Secure Access</p>
+              <h2 className="mt-2 text-[26px] font-black tracking-[-.04em] text-white">Welcome back</h2>
+              <p className="mt-2 text-[10px] leading-5 text-slate-500">Sign in with your CRM executive account. Existing authentication and API flows remain unchanged.</p>
+            </div>
+
+            <form className="space-y-5" onSubmit={handleSubmit((values) => mutation.mutate(values))}>
               <FormField label="Email" required error={errors.email?.message}>
-                <div className="relative"><Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={17}/><Input autoComplete="email" className="pl-10" placeholder="field@crm.local" {...register("email")}/></div>
+                <div className="relative"><Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-600" size={15}/><Input autoComplete="email" className="pl-10" placeholder="field@crm.local" {...register("email")}/></div>
               </FormField>
               <FormField label="Password" required error={errors.password?.message}>
-                <div className="relative"><LockKeyhole className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={17}/><Input autoComplete="current-password" type={showPassword ? "text" : "password"} className="pl-10 pr-10" placeholder="••••••••" {...register("password")}/><button type="button" aria-label="Toggle password visibility" className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400" onClick={() => setShowPassword((v) => !v)}>{showPassword ? <EyeOff size={17}/> : <Eye size={17}/>}</button></div>
+                <div className="relative"><LockKeyhole className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-600" size={15}/><Input autoComplete="current-password" type={showPassword ? "text" : "password"} className="pl-10 pr-10" placeholder="••••••••" {...register("password")}/><button type="button" aria-label="Toggle password visibility" className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-600 transition hover:text-slate-300" onClick={() => setShowPassword((v) => !v)}>{showPassword ? <EyeOff size={16}/> : <Eye size={16}/>}</button></div>
               </FormField>
-              {mutation.isError && <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-900/50 dark:bg-red-950/30 dark:text-red-300">{getErrorMessage(mutation.error)}</div>}
-              <div className="flex items-center justify-between gap-3">
-                <Button type="button" variant="ghost" className="px-0 text-slate-500" onClick={openForgot}><KeyRound size={15}/>Forgot password?</Button>
+              {mutation.isError && <div className="rounded-xl border border-red-400/15 bg-red-400/[.07] px-4 py-3 text-[10px] leading-5 text-red-300">{getErrorMessage(mutation.error)}</div>}
+              <div className="flex flex-col-reverse gap-2 pt-1 sm:flex-row sm:items-center sm:justify-between">
+                <Button type="button" variant="ghost" className="justify-start px-1 text-slate-500" onClick={openForgot}><KeyRound size={14}/>Forgot password?</Button>
                 <Button type="submit" variant="primary" className="min-w-32" disabled={mutation.isPending}>{mutation.isPending ? "Signing in…" : "Sign in"}</Button>
               </div>
             </form>
           </div>
+          <p className="mt-4 text-center text-[8px] text-slate-700">Protected access · Role based menus · Automatic token refresh</p>
         </div>
       </section>
 
       <Dialog open={forgotOpen} onOpenChange={setForgotOpen}>
         <DialogContent className="max-w-md">
           <DialogTitle>Forgot password</DialogTitle>
-          <DialogDescription>Same password-reset request API used by the CRM backend.</DialogDescription>
-          <div className="mt-4 space-y-4">
-            <FormField label="Account Email" required>
-              <Input type="email" value={forgotEmail} onChange={(e) => setForgotEmail(e.target.value)} placeholder="field@crm.local" />
-            </FormField>
-            {forgot.isError && <div className="rounded-xl bg-red-50 p-3 text-sm text-red-700 dark:bg-red-950/30 dark:text-red-300">{getErrorMessage(forgot.error)}</div>}
-            {forgotResult && <div className="rounded-xl bg-emerald-50 p-3 text-sm text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-300"><p>{forgotResult.message || "Password reset request created."}</p>{forgotResult.debugResetToken && <><p className="mt-2 break-all font-mono text-xs">Development reset token: {forgotResult.debugResetToken}</p><Button type="button" variant="outline" className="mt-3 w-full" onClick={() => navigate(`/reset-password?token=${encodeURIComponent(forgotResult.debugResetToken)}`)}>Open Reset Password</Button></>}</div>}
+          <DialogDescription>Use the existing CRM password-reset request API.</DialogDescription>
+          <div className="mt-5 space-y-4">
+            <FormField label="Account Email" required><Input type="email" value={forgotEmail} onChange={(e) => setForgotEmail(e.target.value)} placeholder="field@crm.local" /></FormField>
+            {forgot.isError && <div className="rounded-xl border border-red-400/15 bg-red-400/[.06] p-3 text-[10px] text-red-300">{getErrorMessage(forgot.error)}</div>}
+            {forgotResult && <div className="rounded-xl border border-emerald-400/15 bg-emerald-400/[.06] p-3 text-[10px] leading-5 text-emerald-300"><p>{forgotResult.message || "Password reset request created."}</p>{forgotResult.debugResetToken && <><p className="mt-2 break-all font-mono text-[9px]">Development reset token: {forgotResult.debugResetToken}</p><Button type="button" variant="outline" className="mt-3 w-full" onClick={() => navigate(`/reset-password?token=${encodeURIComponent(forgotResult.debugResetToken)}`)}>Open Reset Password</Button></>}</div>}
             <Button className="w-full" variant="primary" disabled={forgot.isPending || !forgotEmail.trim()} onClick={() => forgot.mutate(forgotEmail.trim())}>{forgot.isPending ? "Requesting…" : "Request password reset"}</Button>
           </div>
         </DialogContent>

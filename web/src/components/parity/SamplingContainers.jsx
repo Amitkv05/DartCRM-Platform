@@ -222,10 +222,10 @@ function SamplingContainer({
       onUpdate({ shipToChoice: value, shippingAddress: "By Hand" });
   }
   return (
-    <div className="rounded-xl border border-amber-300 bg-amber-50/60 p-4 dark:border-amber-900/60 dark:bg-amber-950/10">
-      <div className="mb-4 flex flex-wrap items-center justify-between gap-2 border-b border-amber-200 pb-3 dark:border-amber-900/50">
+    <div className="rounded-xl border border-white/[.08] bg-white/[.018] p-4">
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-2 border-b border-white/[.06] pb-3">
         <div>
-          <p className="text-xs font-bold uppercase tracking-wide text-amber-700 dark:text-amber-300">
+          <p className="text-xs font-bold uppercase tracking-wide text-brand-300">
             Container {index + 1}
           </p>
           <h4 className="font-bold">{group.label}</h4>

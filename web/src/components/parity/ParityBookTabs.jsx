@@ -77,9 +77,9 @@ export default function ParityBookTabs({ items = [], onChange, maxQty = 10, requ
   const loading = tab === "series" ? seriesTitles.isFetching : freeTitles.isFetching;
 
   return <div className="space-y-4">
-    <div className="grid grid-cols-2 overflow-hidden rounded-lg border border-amber-300 dark:border-amber-900/60">
-      <button type="button" onClick={() => setTab("series")} className={`px-4 py-3 text-sm font-bold ${tab === "series" ? "bg-amber-400 text-slate-950" : "bg-white text-slate-600 dark:bg-slate-900 dark:text-slate-300"}`}>Title in Series</button>
-      <button type="button" onClick={() => setTab("free")} className={`px-4 py-3 text-sm font-bold ${tab === "free" ? "bg-amber-400 text-slate-950" : "bg-white text-slate-600 dark:bg-slate-900 dark:text-slate-300"}`}>Title not in Series</button>
+    <div className="grid grid-cols-2 overflow-hidden rounded-xl border border-white/[.08] bg-white/[.012]">
+      <button type="button" onClick={() => setTab("series")} className={`px-4 py-3 text-sm font-bold ${tab === "series" ? "bg-brand-600 text-white" : "bg-transparent text-slate-500 hover:bg-white/[.03] hover:text-slate-200"}`}>Title in Series</button>
+      <button type="button" onClick={() => setTab("free")} className={`px-4 py-3 text-sm font-bold ${tab === "free" ? "bg-brand-600 text-white" : "bg-transparent text-slate-500 hover:bg-white/[.03] hover:text-slate-200"}`}>Title not in Series</button>
     </div>
 
     {tab === "series" ? <div className="space-y-3">

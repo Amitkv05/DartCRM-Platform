@@ -1,10 +1,10 @@
 export function FormField({ label, error, required, hint, children, className = "" }) {
   return (
     <label className={`block ${className}`}>
-      <span className="mb-1.5 block text-sm font-semibold text-slate-700 dark:text-slate-300">{label}{required && <span className="ml-1 text-red-500">*</span>}</span>
+      <span className="mb-1.5 block text-[10px] font-semibold text-slate-400">{label}{required && <span className="ml-1 text-brand-400">*</span>}</span>
       {children}
-      {hint && !error && <span className="mt-1 block text-xs text-slate-500">{hint}</span>}
-      {error && <span className="mt-1 block text-xs font-medium text-red-600">{error}</span>}
+      {hint && !error && <span className="mt-1.5 block text-[9px] leading-4 text-slate-600">{hint}</span>}
+      {error && <span className="mt-1.5 block text-[9px] font-semibold text-red-300">{error}</span>}
     </label>
   );
 }

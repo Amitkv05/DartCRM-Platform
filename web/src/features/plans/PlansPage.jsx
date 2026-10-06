@@ -71,7 +71,7 @@ export default function PlansPage({ day = "today" }) {
         title="Travel Plan"
         description="View Today's Plan and Tomorrow's Plan with the same customer-first flow as the Flutter app."
       />
-      <div className="mb-4 flex gap-2 rounded-xl border border-amber-200 bg-amber-50 p-2 dark:border-amber-900/50 dark:bg-amber-950/10">
+      <div className="mb-4 flex gap-2 rounded-xl border border-white/[.07] bg-white/[.018] p-2 backdrop-blur-xl">
         <Button asChild variant={day === "today" ? "primary" : "ghost"}>
           <Link to="/plans/today">Today's Plan</Link>
         </Button>
@@ -93,7 +93,7 @@ export default function PlansPage({ day = "today" }) {
                     state: { plan: p.raw },
                   })
                 }
-                className="flex w-full items-start justify-between gap-4 rounded-xl border border-slate-400 bg-slate-100 p-4 text-left transition hover:border-blue-400 hover:bg-blue-50 dark:border-slate-700 dark:bg-slate-800 dark:hover:bg-slate-800/70"
+                className="flex w-full items-start justify-between gap-4 rounded-xl border border-white/[.07] bg-white/[.022] p-4 text-left transition-all hover:-translate-y-0.5 hover:border-white/[.13] hover:bg-white/[.04]"
               >
                 <div className="min-w-0 flex-1">
                   <h3 className="text-base font-bold text-violet-800 dark:text-violet-300">

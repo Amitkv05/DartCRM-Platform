@@ -1,6 +1,8 @@
-# DartCRM Web V3 - Mobile Parity Test Build
+# DartCRM Web V3 - Dashboard UI Upgrade
 
-React + Vite web client for CRM Backend V4 (`4.0-admin-audit`). It uses the same backend, shared application-token flow, executive login/JWT flow, hierarchy, menus, approvals and business APIs as the Flutter CRM app.
+This build keeps the existing CRM Backend V4 integration intact and upgrades the frontend presentation to the supplied dark dashboard reference: floating glass navigation, geometric dark background, red accent system, cyan/green analytics/status colors, glass cards, modern tables/forms/dialogs, responsive behavior and CSS micro-animations.
+
+**API contract preserved:** `src/api/apiClient.js` and `src/api/crmApi.js` are unchanged from the uploaded project. Existing routes, query functions, mutations, payloads, token bootstrap, JWT refresh and backend endpoints remain wired as before.
 
 ## Stack
 

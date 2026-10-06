@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
-import { KeyRound } from "lucide-react";
+import { KeyRound, ShieldCheck } from "lucide-react";
 import { crmBootstrap } from "@/api/apiClient";
 import { authApi } from "@/api/crmApi";
 import { Button } from "@/components/ui/button";
@@ -28,19 +28,26 @@ export default function ResetPasswordPage() {
   });
 
   return (
-    <div className="grid min-h-screen place-items-center bg-slate-50 p-5 dark:bg-slate-950">
-      <div className="w-full max-w-md rounded-3xl border border-slate-200 bg-white p-7 shadow-soft dark:border-slate-800 dark:bg-slate-900 sm:p-9">
-        <div className="mb-5 grid h-12 w-12 place-items-center rounded-2xl bg-brand-100 text-brand-700 dark:bg-brand-950"><KeyRound size={22}/></div>
-        <h1 className="text-2xl font-black">Reset password</h1>
-        <p className="mt-2 text-sm text-slate-500">Enter the reset token and choose a new password.</p>
-        <div className="mt-6 space-y-4">
-          <FormField label="Reset Token" required><Input value={resetToken} onChange={(e) => setResetToken(e.target.value)} placeholder="Paste reset token" /></FormField>
-          <FormField label="New Password" required><Input type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} placeholder="Minimum 8 characters" /></FormField>
-          <FormField label="Confirm New Password" required><Input type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} /></FormField>
-          {mutation.isError && <div className="rounded-xl bg-red-50 p-3 text-sm text-red-700 dark:bg-red-950/30 dark:text-red-300">{getErrorMessage(mutation.error)}</div>}
-          {mutation.isSuccess && <div className="rounded-xl bg-emerald-50 p-3 text-sm text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-300">Password changed. Returning to login…</div>}
-          <Button className="w-full" variant="primary" disabled={mutation.isPending} onClick={() => mutation.mutate()}>{mutation.isPending ? "Updating…" : "Reset Password"}</Button>
-          <Link className="block text-center text-sm font-semibold text-brand-700" to="/login">Back to login</Link>
+    <div className="crm-auth-shell relative grid min-h-screen place-items-center overflow-hidden p-5">
+      <div className="crm-ambient crm-ambient-cyan" />
+      <div className="crm-ambient crm-ambient-red" />
+      <div className="w-full max-w-md">
+        <div className="crm-auth-panel rounded-[22px] p-7 sm:p-9">
+          <div className="mb-5 flex items-center justify-between">
+            <div className="grid h-11 w-11 place-items-center rounded-xl border border-brand-400/15 bg-brand-400/[.08] text-brand-300"><KeyRound size={19}/></div>
+            <div className="flex items-center gap-1.5 text-[8px] font-semibold uppercase tracking-[.12em] text-emerald-400"><ShieldCheck size={13}/>Secure reset</div>
+          </div>
+          <h1 className="text-[25px] font-black tracking-[-.04em] text-white">Reset password</h1>
+          <p className="mt-2 text-[10px] leading-5 text-slate-500">Enter your reset token and choose a new password. The existing backend reset flow is unchanged.</p>
+          <div className="mt-7 space-y-4">
+            <FormField label="Reset Token" required><Input value={resetToken} onChange={(e) => setResetToken(e.target.value)} placeholder="Paste reset token" /></FormField>
+            <FormField label="New Password" required><Input type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} placeholder="Minimum 8 characters" /></FormField>
+            <FormField label="Confirm New Password" required><Input type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} /></FormField>
+            {mutation.isError && <div className="rounded-xl border border-red-400/15 bg-red-400/[.06] p-3 text-[10px] leading-5 text-red-300">{getErrorMessage(mutation.error)}</div>}
+            {mutation.isSuccess && <div className="rounded-xl border border-emerald-400/15 bg-emerald-400/[.06] p-3 text-[10px] text-emerald-300">Password changed. Returning to login…</div>}
+            <Button className="w-full" variant="primary" disabled={mutation.isPending} onClick={() => mutation.mutate()}>{mutation.isPending ? "Updating…" : "Reset Password"}</Button>
+            <Link className="block text-center text-[10px] font-semibold text-brand-300 transition hover:text-brand-200" to="/login">Back to login</Link>
+          </div>
         </div>
       </div>
     </div>

@@ -6,13 +6,15 @@ import { tokenStorage } from "@/utils/storage";
 
 function Splash() {
   return (
-    <div className="grid min-h-screen place-items-center bg-slate-950 text-white">
+    <div className="crm-auth-shell relative grid min-h-screen place-items-center overflow-hidden text-white">
+      <div className="crm-ambient crm-ambient-cyan" />
+      <div className="crm-ambient crm-ambient-red" />
       <div className="text-center">
-        <div className="mx-auto grid h-16 w-16 place-items-center rounded-2xl bg-brand-600 text-2xl font-black shadow-lg">D</div>
-        <p className="mt-4 text-lg font-black">DartCRM</p>
-        <p className="mt-1 text-sm text-slate-400">Preparing secure CRM session…</p>
-        <div className="mx-auto mt-5 h-1.5 w-36 overflow-hidden rounded-full bg-white/10">
-          <div className="h-full w-1/2 animate-pulse rounded-full bg-brand-500" />
+        <div className="crm-brand-mark mx-auto h-14 w-14 rounded-2xl text-xl">D</div>
+        <p className="mt-4 text-[15px] font-black tracking-wide">DartCRM</p>
+        <p className="mt-1.5 text-[9px] font-medium text-slate-600">Preparing secure CRM session…</p>
+        <div className="mx-auto mt-5 h-1 w-36 overflow-hidden rounded-full bg-white/[.06]">
+          <div className="h-full w-1/2 animate-pulse rounded-full bg-gradient-to-r from-brand-600 to-brand-400 shadow-[0_0_12px_rgba(255,91,80,.35)]" />
         </div>
       </div>
     </div>

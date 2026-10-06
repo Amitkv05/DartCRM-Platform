@@ -1,11 +1,12 @@
 import { useMutation } from "@tanstack/react-query";
-import { FileUp, Trash2 } from "lucide-react";
+import { Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { fileApi } from "@/api/crmApi";
 import {
   WorkflowSection,
   EmptyMessage,
 } from "@/components/parity/WorkflowSection";
+import AnimatedFileUpload from "@/components/common/AnimatedFileUpload";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { getErrorMessage } from "@/utils/errors";
@@ -28,63 +29,57 @@ export default function DocumentPanel({ documents, onChange }) {
     },
     onError: (e) => toast.error(getErrorMessage(e)),
   });
+
   return (
     <WorkflowSection title="Upload Documents">
-      <div className="space-y-3">
-        <div className="grid gap-3 md:grid-cols-[1fr_1.5fr_auto]">
-          <Input id="visit-doc-name" placeholder="Document Name" />
-          <label className="flex h-10 cursor-pointer items-center rounded-lg border border-slate-200 bg-white px-3 text-sm dark:border-slate-700 dark:bg-slate-950">
-            <FileUp size={15} className="mr-2" />
-            {upload.isPending ? "Uploading…" : "Choose PDF / Image / Document"}
-            <input
-              type="file"
-              className="hidden"
-              disabled={upload.isPending}
-              accept=".jpg,.jpeg,.png,.pdf,.doc,.docx,.xls,.xlsx"
-              onChange={(e) => {
-                const f = e.target.files?.[0];
-                if (!f) return;
-                const name =
-                  document.getElementById("visit-doc-name")?.value?.trim() ||
-                  f.name;
-                upload.mutate({ file: f, name });
-                e.target.value = "";
-              }}
-            />
-          </label>
-          <span className="self-center text-xs text-slate-500">Max 10 MB</span>
+      <div className="space-y-4">
+        <div className="grid gap-4 xl:grid-cols-[minmax(0,.65fr)_minmax(380px,1.35fr)]">
+          <div>
+            <p className="mb-1.5 text-[10px] font-bold uppercase tracking-[.08em] text-slate-500">Document name</p>
+            <Input id="visit-doc-name" placeholder="Document Name (optional)" />
+            <p className="mt-2 text-[9px] leading-4 text-slate-600">
+              If left empty, DartCRM will use the selected file name. Accepted: JPG, PNG, PDF, DOC, DOCX, XLS, XLSX.
+            </p>
+          </div>
+
+          <AnimatedFileUpload
+            maxSizeMB={10}
+            disabled={upload.isPending}
+            accept=".jpg,.jpeg,.png,.pdf,.doc,.docx,.xls,.xlsx"
+            onValidationError={(message) => toast.error(message)}
+            onUpload={async (file) => {
+              const name = document.getElementById("visit-doc-name")?.value?.trim() || file.name;
+              await upload.mutateAsync({ file, name });
+            }}
+          />
         </div>
+
         {!documents.length ? (
           <EmptyMessage>No documents uploaded.</EmptyMessage>
         ) : (
-          <div className="overflow-x-auto">
+          <div className="crm-table-shell overflow-x-auto rounded-xl border border-white/[.06]">
             <table className="w-full min-w-[650px] text-sm">
-              <thead className="bg-amber-100 dark:bg-amber-950/30">
+              <thead className="bg-white/[.025]">
                 <tr>
-                  <th className="p-2 text-left">S.No</th>
-                  <th className="p-2 text-left">Document Name</th>
-                  <th className="p-2 text-left">Uploaded File</th>
-                  <th className="p-2 text-right">Action</th>
+                  <th className="p-3 text-left text-[9px] uppercase tracking-[.08em] text-slate-500">S.No</th>
+                  <th className="p-3 text-left text-[9px] uppercase tracking-[.08em] text-slate-500">Document Name</th>
+                  <th className="p-3 text-left text-[9px] uppercase tracking-[.08em] text-slate-500">Uploaded File</th>
+                  <th className="p-3 text-right text-[9px] uppercase tracking-[.08em] text-slate-500">Action</th>
                 </tr>
               </thead>
               <tbody>
                 {documents.map((d, i) => (
-                  <tr
-                    key={`${d.fileName}-${i}`}
-                    className="border-t dark:border-slate-800"
-                  >
-                    <td className="p-2">{i + 1}</td>
-                    <td className="p-2">{d.documentName}</td>
-                    <td className="p-2">{d.fileName}</td>
-                    <td className="p-2 text-right">
+                  <tr key={`${d.fileName}-${i}`} className="border-t border-white/[.045]">
+                    <td className="p-3">{i + 1}</td>
+                    <td className="p-3">{d.documentName}</td>
+                    <td className="p-3 text-slate-400">{d.fileName}</td>
+                    <td className="p-3 text-right">
                       <Button
                         type="button"
                         size="icon"
                         variant="ghost"
-                        className="text-red-600"
-                        onClick={() =>
-                          onChange(documents.filter((_, idx) => idx !== i))
-                        }
+                        className="text-red-400"
+                        onClick={() => onChange(documents.filter((_, idx) => idx !== i))}
                       >
                         <Trash2 size={15} />
                       </Button>

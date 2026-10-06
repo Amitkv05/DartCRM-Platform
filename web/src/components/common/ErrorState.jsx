@@ -1,4 +1,6 @@
 import { AlertTriangle, RotateCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { getErrorMessage } from "@/utils/errors";
-export default function ErrorState({ error, onRetry }) { return <div className="rounded-2xl border border-red-200 bg-red-50 p-5 text-red-800 dark:border-red-900/60 dark:bg-red-950/30 dark:text-red-300"><div className="flex items-start gap-3"><AlertTriangle className="mt-0.5" size={20}/><div className="flex-1"><p className="font-semibold">Unable to load data</p><p className="mt-1 text-sm">{getErrorMessage(error)}</p>{onRetry && <Button size="sm" variant="outline" className="mt-3" onClick={onRetry}><RotateCw size={14}/>Retry</Button>}</div></div></div>; }
+export default function ErrorState({ error, onRetry }) {
+  return <div className="rounded-[16px] border border-red-400/15 bg-red-400/[.055] p-5 text-red-200"><div className="flex items-start gap-3"><div className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-red-400/10"><AlertTriangle size={18}/></div><div className="min-w-0 flex-1"><p className="text-[12px] font-bold">Unable to load data</p><p className="mt-1 text-[10px] leading-5 text-red-300/70">{getErrorMessage(error)}</p>{onRetry && <Button size="sm" variant="outline" className="mt-3" onClick={onRetry}><RotateCw size={13}/>Retry</Button>}</div></div></div>;
+}
