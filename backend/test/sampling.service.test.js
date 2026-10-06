@@ -25,21 +25,41 @@ class MockExecutor {
         ],
       ];
     }
+
+    // Security patch: createCustomerSampling now verifies that the requested
+    // executive is the actor or belongs to the actor's down hierarchy.
+    if (sql.includes("WITH RECURSIVE down_tree")) {
+      return [
+        [
+          {
+            id: 1001,
+            manager_executive_id: 1002,
+            depth: 0,
+          },
+        ],
+      ];
+    }
+
     if (sql.includes("FROM customers") && sql.includes("customer_status")) {
       return [[{ id: 1 }]];
     }
+
     if (sql.includes("FROM shipment_modes")) {
       return [[{ id: 1 }]];
     }
+
     if (sql.includes("FROM books") && sql.includes("list_price")) {
       return [[{ id: 3, list_price: "340.00", series_id: 2 }]];
     }
+
     if (sql.includes("FROM sampling_types")) {
       return [[{ id: 2, name: "Personal Copy" }]];
     }
+
     if (sql.includes("FROM customer_contacts")) {
       return [[{ id: 1 }]];
     }
+
     if (sql.includes("FROM sampling_budgets")) {
       return [
         [
@@ -52,18 +72,34 @@ class MockExecutor {
         ],
       ];
     }
+
     if (sql.includes("SELECT last_number FROM request_sequences")) {
       return [[]];
     }
+
     if (sql.includes("INSERT INTO request_sequences")) {
       return [{ insertId: 1 }];
     }
+
     if (sql.includes("INSERT INTO customer_sampling_requests")) {
       return [{ insertId: 77 }];
     }
+
     if (sql.includes("INSERT INTO customer_sampling_request_items")) {
       return [{ insertId: 78 }];
     }
+
+    // Approval resubmission patch: createApproval first checks whether an
+    // approval row already exists for the same module/entity.
+    if (
+      sql.includes("FROM approval_requests") &&
+      sql.includes("module_name") &&
+      sql.includes("entity_id") &&
+      sql.includes("FOR UPDATE")
+    ) {
+      return [[]];
+    }
+
     if (
       sql.includes("WITH RECURSIVE manager_chain") ||
       sql.includes("LEFT JOIN executives m")
@@ -80,12 +116,15 @@ class MockExecutor {
         ],
       ];
     }
+
     if (sql.includes("INSERT INTO approval_requests")) {
       return [{ insertId: 88 }];
     }
+
     if (sql.includes("INSERT INTO approval_history")) {
       return [{ insertId: 89 }];
     }
+
     if (sql.includes("INSERT INTO admin_request_history")) {
       return [{ affectedRows: 1 }];
     }
@@ -93,6 +132,7 @@ class MockExecutor {
     if (sql.includes("INSERT INTO notifications")) {
       return [{ insertId: 90 }];
     }
+
     if (sql.includes("UPDATE customer_sampling_requests SET request_status")) {
       return [{ affectedRows: 1 }];
     }
@@ -103,6 +143,7 @@ class MockExecutor {
 
 test("customer sampling accepts Flutter legacy item data without undefined SQL binds", async () => {
   const executor = new MockExecutor();
+
   const result = await createCustomerSampling(
     {
       customerId: 1,
@@ -125,7 +166,10 @@ test("customer sampling accepts Flutter legacy item data without undefined SQL b
         },
       ],
     },
-    { userId: 1, executiveId: 1001 },
+    {
+      userId: 1,
+      executiveId: 1001,
+    },
     executor,
   );
 
