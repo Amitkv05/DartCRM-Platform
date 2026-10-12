@@ -161,9 +161,6 @@ Each workflow runs only when its application (or its workflow file) changes. Wor
 <img width="1672" height="941" alt="ChatGPT Image Oct 7, 2026, 10_20_13 PM-3" src="https://github.com/user-attachments/assets/47185a7b-752f-457b-9bbd-3482264de91e" />
 <img width="1672" height="941" alt="ChatGPT Image Oct 7, 2026, 10_20_14 PM-4" src="https://github.com/user-attachments/assets/11ab2878-4b72-4005-ac43-4e9c16f0a2d7" />
 
-## Architecture Documentation
-
-See [`docs/architecture/system-architecture.md`](docs/architecture/system-architecture.md) for a more detailed overview of the platform flow.
 
 ## Security
 
