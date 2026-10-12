@@ -6,11 +6,11 @@ DartCRM is a full-stack Customer Relationship Management platform with a React w
 
 ## Platform Components
 
-| Component | Main technologies | Purpose |
-| --- | --- | --- |
-| `web/` | React.js, Vite, Redux Toolkit, TanStack Query, Axios | Browser-based CRM interface |
-| `mobile/` | Flutter, Dart, Riverpod, Dio/HTTP | Mobile CRM for field and operational workflows |
-| `backend/` | Node.js, Express.js, MySQL | Shared REST API, authentication, authorization, business logic and persistence |
+| Component  | Main technologies                                    | Purpose                                                                        |
+| ---------- | ---------------------------------------------------- | ------------------------------------------------------------------------------ |
+| `web/`     | React.js, Vite, Redux Toolkit, TanStack Query, Axios | Browser-based CRM interface                                                    |
+| `mobile/`  | Flutter, Dart, Riverpod, Dio/HTTP                    | Mobile CRM for field and operational workflows                                 |
+| `backend/` | Node.js, Express.js, MySQL                           | Shared REST API, authentication, authorization, business logic and persistence |
 
 ## Architecture
 
@@ -155,9 +155,11 @@ Each workflow runs only when its application (or its workflow file) changes. Wor
 
 ## Screenshots
 
-Add sanitized portfolio screenshots under `docs/screenshots/`. Use demo data only; do not expose real customer, employee, company or authentication information.
-
-See [`docs/screenshots/README.md`](docs/screenshots/README.md) for the recommended screenshot set.
+<img width="1254" height="1254" alt="DartCRM Neon Operations Suite" src="https://github.com/user-attachments/assets/20e49d86-58f5-485f-87f6-ee2738148e0a" />
+<img width="1672" height="941" alt="ChatGPT Image Oct 7, 2026, 10_20_09 PM-1" src="https://github.com/user-attachments/assets/2e89cd31-d407-476d-b0ea-7bd00c83e76e" />
+<img width="1672" height="941" alt="ChatGPT Image Oct 7, 2026, 10_20_11 PM-2" src="https://github.com/user-attachments/assets/f8ae6002-f965-429f-99b6-39b11cb91c6d" />
+<img width="1672" height="941" alt="ChatGPT Image Oct 7, 2026, 10_20_13 PM-3" src="https://github.com/user-attachments/assets/47185a7b-752f-457b-9bbd-3482264de91e" />
+<img width="1672" height="941" alt="ChatGPT Image Oct 7, 2026, 10_20_14 PM-4" src="https://github.com/user-attachments/assets/11ab2878-4b72-4005-ac43-4e9c16f0a2d7" />
 
 ## Architecture Documentation
 
